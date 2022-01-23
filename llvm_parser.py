@@ -457,6 +457,14 @@ def memory_manag(fs, k_fs):
                     rename_front_val(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
                     print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                     l.operations.pop(l.operations.index(op))
+    
+    for f in fs:
+        for l in f.labels:
+            for op in l.operations[::-1]:
+                if op.name == 'trunc' or op.name == 'sext':
+                    rename_front_arg(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
+                    print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
+                    l.operations.pop(l.operations.index(op))
 
     # with open("F:\\STU\\FIIT\\BP\\output_unroll.txt", "w") as f1:
     #     for func in fs:
