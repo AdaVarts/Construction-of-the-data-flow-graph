@@ -1,3 +1,5 @@
+import copy
+
 class Function:
     def __init__(self, name, params):
         self.name = name
@@ -6,6 +8,10 @@ class Function:
         self.labels = []
         self.label_map = {}
         self.ssa_map = {}
+    
+    def init_ssamap(self, source_labels):
+        for l in source_labels:
+            self.ssa_map[l.name] = 0
     
 class Operation:
     def __init__(self, name, value=None, args=None):
@@ -211,41 +217,44 @@ def br_two(functions, op):
 
 
 def set_new_name(name, function):
-    try:
-        function.ssa_map[name] += 1
-        return name+str(function.ssa_map[name])
-    except Exception:
-        function.ssa_map[name] = 0
+    function.ssa_map[get_the_real_name(name)] +=1
+    if function.ssa_map[get_the_real_name(name)] == 1:
         return name
+    else:
+        return get_the_real_name(name)+'-'+str(function.ssa_map[get_the_real_name(name)]-1)
 
 def get_current_name(name, function):
-    try:
-        number = function.ssa_map[name[1:]]
-        return name+str(number+1)
-    except Exception:
+    if function.ssa_map[get_the_real_name(name)] == 0:
         return name
+    else:
+        return get_the_real_name(name)+'-'+str(function.ssa_map[get_the_real_name(name)])
+
+def get_the_real_name(name):
+    return name.split('-')[0]
 
 def add_l2(source, functions, l2):
     branch = None
     for op in l2.operations:
-        functions[-1].labels[-1].operations.append(op)
+        functions[-1].labels[-1].operations.append(copy.deepcopy(op))
         if op.name == 'br' and op.args is None:
+            functions[-1].labels[-1].operations[-1].value = \
+                '%' + get_current_name(reduce_to_value(functions[-1].labels[-1].operations[-1].value), functions[-1])
             branch = op.value
             return branch, functions
         elif op.name == 'br':
             functions[-1].labels[-1].operations.append(Operation(op.name, op.value,
-                                                                 [get_current_name(arg, functions[-1]) for arg in op.args]))
+                                                        ['%'+get_current_name(reduce_to_value(arg), functions[-1]) for arg in op.args]))
             branch, functions = unroll_two(source, functions, op)
     return branch, functions
 
 def add_label(source, functions, l1, l2):
     branch = None
     for op in l1.operations:
-        functions[-1].labels[-2].operations.append(op)
+        functions[-1].labels[-2].operations.append(copy.deepcopy(op))
         if op.name == 'br' and op.args is None:
-            branch = op.value
             functions[-1].labels[-2].operations[-1].value = \
-                '%' + get_current_name(functions[-1].labels[-2].operations[-1].value[1:], functions[-1])
+                '%' + get_current_name(reduce_to_value(functions[-1].labels[-2].operations[-1].value), functions[-1])
+            branch = op.value
             br2, functions = add_l2(source, functions, l2)
             if branch == br2:
                 return branch, functions
@@ -254,7 +263,7 @@ def add_label(source, functions, l1, l2):
                 # unroll_label
         elif op.name == 'br':
             functions[-1].labels[-2].operations.append(Operation(op.name, op.value,
-                                                                 [get_current_name(arg, functions[-1]) for arg in op.args]))
+                                                                 [get_current_name(reduce_to_value(arg), functions[-1]) for arg in op.args]))
             branch, functions = unroll_two(source, functions, op)
     return branch, functions
 
@@ -264,9 +273,13 @@ def in_function(function, label):
             return True
     return False
 
+def reduce_to_value(name):
+    b = name[ : : -1 ][ : : -1 ]
+    return b.replace('%', '')
+
 def unroll_two(source, functions, op):
     # if not in_function(functions[-1], op.args[0]):
-    functions[-1].labels.append(Label(set_new_name(op.args[0][1:], functions[-1])))
+    functions[-1].labels.append(Label(set_new_name(reduce_to_value(op.args[0]), functions[-1])))
     # if not in_function(functions[-1], op.args[1]):
     functions[-1].labels.append(Label(set_new_name(op.args[1][1:], functions[-1])))
     branch, functions = add_label(source, functions, source.label_map[op.args[0][1:]], source.label_map[op.args[1][1:]])
@@ -282,10 +295,10 @@ def unroll_label(source, functions, l):
                 lbl = br_two(functions, op)
                 if not lbl:
                     functions[-1].labels[-1].operations.append(Operation(op.name, op.value,
-                                                               [get_current_name(arg, functions[-1]) for arg in op.args]))
+                                                               ['%'+get_current_name(reduce_to_value(arg), functions[-1]) for arg in op.args]))
                     branch, functions = unroll_two(source, functions, op)
                     functions[-1].labels.append(Label(set_new_name(branch[1:], functions[-1])))
-                    functions = unroll_label(source, functions, source.label_map[branch[1:]])
+                    functions = unroll_label(source, functions, source.label_map[get_the_real_name(branch[1:])])
                 else:
                     index_l = functions[-1].labels.index(functions[-1].labels[-1])
                     index_op = functions[-1].labels[-1].operations.index(functions[-1].labels[-1].operations[-1])
@@ -302,6 +315,7 @@ def unroll_llvm(fs, known_funcs):
     functions = []
     for f in fs:
         functions.append(Function(f.name, f.params))
+        functions[-1].init_ssamap(f.labels)
         functions[-1].labels.append(Label(set_new_name(f.labels[0].name, functions[-1])))
         functions = unroll_label(f, functions, f.labels[0])
 
@@ -369,7 +383,7 @@ def is_used_front(f, val, index_op, index_l):
                 return True
     return False
 
-def rename_backw(f, val, arg, index_op, index_l):
+def rename_backw_val(f, val, arg, index_op, index_l):
     for j in range(index_op, -1, -1):
         if arg == f.labels[index_l].operations[j].value:
             f.labels[index_l].operations[j].value = val
@@ -414,18 +428,13 @@ def memory_manag(fs, k_fs):
             for op in l.operations[::-1]:
                 if op.name in ['printf', 'sprintf', 'free', 'puts']:
                     l.operations.pop(l.operations.index(op))
-            # for op in l.operations:
-                # elif op.name == 'load':
-                #     if not is_used(f, op.value, l, l.operations.index(op), f.labels.index(l)):
-                #         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
-                #         l.operations.pop(l.operations.index(op))
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
                 if op.name == 'store':
                     if (not is_used_front(f, op.value, l.operations.index(op)+1, f.labels.index(l)) and
                        is_used_args(f, op.args[0], l.operations.index(op)+1, f.labels.index(l))):
-                        rename_backw(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
+                        rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
                     elif op.args[0] in f.params:
@@ -444,7 +453,7 @@ def memory_manag(fs, k_fs):
         for l in f.labels:
             for op in l.operations[::-1]:
                 if op.name == 'bitcast':
-                    rename_backw(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
+                    rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                     rename_front_val(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
                     print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                     l.operations.pop(l.operations.index(op))
@@ -467,7 +476,7 @@ def memory_manag(fs, k_fs):
                 if op.name == 'store':
                     if (is_used_backw(f, op.args[0], l.operations.index(op)-1, f.labels.index(l)) and
                        not is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l))):
-                        rename_backw(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
+                        rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
                     elif is_overwritten(f, op.value, l.operations.index(op)+1, f.labels.index(l)):
