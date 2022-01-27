@@ -271,5 +271,7 @@ def unroll_llvm(fs, known_funcs):
     return functions
 
 
-fs, k_fs = load_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll")
-unroll_llvm(fs, k_fs)
+def parse_llvm(filename):
+    fs, k_fs = load_llvm(filename)
+    fs = unroll_llvm(fs, k_fs)
+    return fs

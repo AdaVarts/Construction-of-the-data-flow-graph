@@ -2,7 +2,6 @@ class Function:
     def __init__(self, name, params):
         self.name = name
         self.params = params
-        # self.ret_value = ret_value
         self.labels = []
         self.label_map = {}
         self.ssa_map_lbl = {}
