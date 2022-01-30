@@ -122,18 +122,12 @@ def load_llvm(filename):
 def br_two(functions, op):
     val = op.value
     num = None
-    # slt = False
-    # sge = False
     for label in functions[-1].labels[::-1]:
         for oper in label.operations[::-1]:
             if val == oper.value:
                 if oper.name == 'icmp':
                     val = oper.args[1]
                     num = oper.args[2]
-                    # if oper.args[0] == 'slt':   # !=
-                    #     slt = True
-                    # elif oper.args[0] == 'sge':   # !=
-                    #     sge = True
                     continue
                 elif oper.name == 'load' or oper.name == 'store':
                     val = oper.args[0]
@@ -237,6 +231,29 @@ def unroll_label(source, functions, l):
 
 def unroll_llvm(fs, known_funcs):
     functions = []
+
+    for f in fs:
+        for l in f.labels:
+            for op in l.operations:
+                if op.name == 'br' and op.args is not None:
+                    op.value = f.name+'_'+op.value
+                    continue
+                elif op.name == 'br': continue
+
+                if op.value != '':
+                    op.value = f.name+'_'+op.value
+                if op.args == [] or op.args is None:
+                    continue
+
+                if op.name == 'phi':
+                    op.args[0][0] = f.name+'_'+op.args[0][0]
+                    op.args[1][0] = f.name+'_'+op.args[1][0]
+                else:
+                    if not is_constant(op.args[0]):
+                        op.args[0] = f.name+'_'+op.args[0]
+                    if len(op.args) > 1 and not is_constant(op.args[1]):
+                        op.args[1] = f.name+'_'+op.args[1]
+
     for f in fs:
         functions.append(Function(f.name, f.params))
         functions[-1].init_ssamap(f.labels)
@@ -244,6 +261,8 @@ def unroll_llvm(fs, known_funcs):
         functions[-1].labels.append(Label(set_new_name(f.labels[0].name, functions[-1].ssa_map_lbl)))
         functions = unroll_label(f, functions, f.labels[0])
 
+
+    
 
     for f in functions:
         for l in f.labels:

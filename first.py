@@ -1,13 +1,15 @@
-from msilib.schema import Error
-import llvmlite
+# from msilib.schema import Error
+# import llvmlite
+import copy
+from function_manag import merge_two_funcs
 from llvm_parser import parse_llvm
-from pycparser import parse_file, preprocess_file
-import pyparsing as pp
-from llvmlite import ir
-from llvmlite import binding
+from pycparser import parse_file#, preprocess_file
+# import pyparsing as pp
+# from llvmlite import ir
+# from llvmlite import binding
 import llvm_g 
-import io
-import ast
+# import io
+# import ast
 from DFG_structure import DFG, Edge, Node
 
 def translate_to_c(filename):
@@ -57,9 +59,9 @@ def start_DFG(function):
     for lbl in function.labels:
         for op in lbl.operations:
             try:
-                if op.name == 'store' or op.name == 'ret':
+                if op.name == 'store':
                     save_one_tail(0, dfg, function.name, op)
-                elif op.name == 'br':
+                elif op.name == 'br' or op.name == 'ret':
                     continue
                 elif op.name == 'phi':
                     dfg, node = save_node(dfg, function.name+'-'+op.value)
@@ -97,4 +99,10 @@ if __name__ == "__main__":
     functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll")
     for f in functions:
         if f.name == 'encrypt':
-            start_DFG(f)
+            encrypt_f = copy.deepcopy(f)
+        if f.name == 'permute':
+            sbox_f = copy.deepcopy(f)
+    merge_two_funcs(encrypt_f, sbox_f)
+    # for f in functions:
+    #     if f.name == 'encrypt':
+    #         start_DFG(f)
