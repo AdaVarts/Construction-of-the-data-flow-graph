@@ -12,7 +12,7 @@ import llvm_g
 # import ast
 from DFG_structure import DFG, Edge, Node
 
-def translate_to_c(filename):
+def translate_to_c(filename, printW):
     st = parse_file(filename, use_cpp=True, 
             cpp_path='gcc', 
             cpp_args=['-E', r'-IC:/Users/Adalina/AppData/Local/Programs/Python/Python37/Lib/site-packages/pycparser/utils/fake_libc_include'],
@@ -22,7 +22,7 @@ def translate_to_c(filename):
     # st.show(buf = f)
     # f.close()
 
-    generator = llvm_g.llvm_Generator()
+    generator = llvm_g.llvm_Generator(printW)
     return generator.start(st)
 
 def get_function(module, name_f):
@@ -78,8 +78,8 @@ def start_DFG(function):
     print(dfg.__str__())
     
 
-def convert_C_into_llvm(filename):
-    module = translate_to_c(filename)
+def convert_C_into_llvm(filename, printW):
+    module = translate_to_c(filename, printW)
     m = module.__str__()
     return m
 
