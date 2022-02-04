@@ -18,13 +18,9 @@ def translate_to_c(filename):
             cpp_args=['-E', r'-IC:/Users/Adalina/AppData/Local/Programs/Python/Python37/Lib/site-packages/pycparser/utils/fake_libc_include'],
             integer_types=False)
             # cpp_args=['-E'])
-    f = open("F:\\STU\\FIIT\\BP\\ast_pr.txt", "w")
-    st.show(buf = f)
-    f.close()
-
-    # create functions as I want manually, it doesn't matter for graph
-
-    
+    # f = open("F:\\STU\\FIIT\\BP\\ast_pr.txt", "w")
+    # st.show(buf = f)
+    # f.close()
 
     generator = llvm_g.llvm_Generator()
     return generator.start(st)
@@ -81,6 +77,11 @@ def start_DFG(function):
             
     print(dfg.__str__())
     
+
+def convert_C_into_llvm(filename):
+    module = translate_to_c(filename)
+    m = module.__str__()
+    return m
 
 if __name__ == "__main__":
     # module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c")
