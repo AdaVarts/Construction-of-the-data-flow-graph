@@ -3,7 +3,7 @@ from classes import Function, Operation, Label
 from memory_management import memory_manag, rename_front_arg
 from addit_methods import *
 
-def load_llvm(filename):
+def load_llvm(filename, progress):
     functions = []
     known_funcs = []
 
@@ -12,6 +12,7 @@ def load_llvm(filename):
         lines = f.readlines()
 
     start = False
+    progress.emit("start loading")
     for line in lines:
         data = line.split(' ')
         data = remove_empty(data)
@@ -99,7 +100,10 @@ def load_llvm(filename):
                                                                     args=[[get_name(line.split(',')[0].split(' ')[-1]), get_name(line.split(',')[1])],
                                                                         [get_name(line.split(',')[2]), get_name(line.split(',')[3])]]))
 
+    progress.emit("end loading")
+    progress.emit("start customising")
     functions = memory_manag(functions, known_funcs)
+    progress.emit("end memory management")
 
     with open("F:\\STU\\FIIT\\BP\\output_llvm.txt", "w") as f:
         for func in functions:
@@ -229,9 +233,9 @@ def unroll_label(source, functions, l):
         functions[-1].labels[-1].operations.append(copy.deepcopy(op))
 
 
-def unroll_llvm(fs, known_funcs):
+def unroll_llvm(fs, known_funcs, progress):
     functions = []
-
+    progress.emit("start function identification")
     for f in fs:
         for l in f.labels:
             for op in l.operations:
@@ -253,17 +257,18 @@ def unroll_llvm(fs, known_funcs):
                         op.args[0] = f.name+'_'+op.args[0]
                     if len(op.args) > 1 and not is_constant(op.args[1]):
                         op.args[1] = f.name+'_'+op.args[1]
-
+    progress.emit("end function identification")
+    progress.emit("start unrolling")
     for f in fs:
         functions.append(Function(f.name, f.params))
         functions[-1].init_ssamap(f.labels)
         functions[-1].init_ssavarmap(f.labels)
         functions[-1].labels.append(Label(set_new_name(f.labels[0].name, functions[-1].ssa_map_lbl)))
         functions = unroll_label(f, functions, f.labels[0])
-
+    progress.emit("end unrolling")
 
     
-
+    progress.emit("start variable identification")
     for f in functions:
         for l in f.labels:
             for op in l.operations:
@@ -272,7 +277,7 @@ def unroll_llvm(fs, known_funcs):
                     op.value = set_new_name(op.value, f.ssa_map_var)
                     if op.value != var:
                         rename_front_arg(f, var, op.value, l.operations.index(op)+1, f.labels.index(l))
-
+    progress.emit("end variable identification")
     print("*******************************************************************")
     
     with open("F:\\STU\\FIIT\\BP\\output_unroll.txt", "w") as f:
@@ -290,7 +295,7 @@ def unroll_llvm(fs, known_funcs):
     return functions
 
 
-def parse_llvm(filename):
-    fs, k_fs = load_llvm(filename)
-    fs = unroll_llvm(fs, k_fs)
+def parse_llvm(filename, progress):
+    fs, k_fs = load_llvm(filename, progress)
+    fs = unroll_llvm(fs, k_fs, progress)
     return fs

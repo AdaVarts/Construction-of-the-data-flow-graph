@@ -4,27 +4,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from constructor import Ui_ConstructorWindow
+from llvm_parser import parse_llvm
 from main import Ui_MainWindow
 from first import convert_C_into_llvm
-
-class WorkerSignals(QObject):
-    finished = pyqtSignal()
-    result = pyqtSignal(object)
-    progress = pyqtSignal(str)
-
-class Worker(QRunnable):
-    def __init__(self, fn, *args):
-        super(Worker, self).__init__()
-        self.fn = fn
-        self.args = args
-        self.signals = WorkerSignals()
-
-    @pyqtSlot()
-    def run(self):
-        m = self.fn(*self.args, self.signals.progress)
-        self.signals.result.emit(m)
-        self.signals.finished.emit()
-
+from worker import *
 
 class MainWin(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
@@ -38,6 +22,7 @@ class MainWin(QtWidgets.QMainWindow):
         self.ui.btnChooseC.clicked.connect(self.clicked_choose_c_file)
         self.ui.btnChooseLlvm.clicked.connect(self.clicked_choose_llvm_file)
         self.ui.btnConvInLlvm.clicked.connect(self.clicked_convert_into_llvm)
+        self.ui.btnBuildDFG.clicked.connect(self.clicked_build_module)
 
     def clicked_choose_c_file(self):
         fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","C Files (*.c)")
@@ -67,6 +52,20 @@ class MainWin(QtWidgets.QMainWindow):
 
     def reportProgress(self, s):
         self.ui.textPrint.append(s)
+
+    
+    def clicked_build_module(self):
+        worker = Worker(parse_llvm, self.ui.linePathForLlvm.text())
+        worker.signals.result.connect(self.open_constructW)
+        worker.signals.progress.connect(self.reportProgress)
+        self.threadpool.start(worker)
+    
+    def open_constructW(self, fs):
+        self.ui = Ui_ConstructorWindow()
+        self.ui.setupUi(self, fs)
+        # self.ui.butAdd.clicked.connect(self.clicked_add_product)
+        # self.ui.tableWidget.itemDoubleClicked.connect(self.clicked_open_product)
+        # self.ui.butHome.clicked.connect(self.open_main)
 
 
 if __name__=="__main__":

@@ -11,6 +11,7 @@ import llvm_g
 # import io
 # import ast
 from DFG_structure import DFG, Edge, Node
+from worker import WorkerSignals
 
 def translate_to_c(filename, printW):
     st = parse_file(filename, use_cpp=True, 
@@ -96,12 +97,12 @@ if __name__ == "__main__":
     # f1.write(m)
     # f1.close()
     # print(m)
-
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll")
+    sss = WorkerSignals()
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
     for f in functions:
         if f.name == 'encrypt':
             encrypt_f = copy.deepcopy(f)
-        if f.name == 'permute':
+        if f.name == 'Sbox':
             sbox_f = copy.deepcopy(f)
     merge_two_funcs(encrypt_f, sbox_f)
     # for f in functions:
