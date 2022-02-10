@@ -104,7 +104,7 @@ if __name__ == "__main__":
             encrypt_f = copy.deepcopy(f)
         if f.name == 'Sbox':
             sbox_f = copy.deepcopy(f)
-    merge_two_funcs(encrypt_f, sbox_f)
+    merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     # for f in functions:
     #     if f.name == 'encrypt':
     #         start_DFG(f)
