@@ -3,9 +3,11 @@ from addit_methods import is_constant
 from classes import Function
 import logging
 
+from memory_management import rename_front_arg
+
 # LOGGER = logging.Logger('function unrollment')
 
-def merge_in_one(fs, name, addsf, dellsf, progress):
+def merge_in_one(fs, name, addsf, delsf, progress):
     for f in fs:
         if f.name == name:
             start_f = copy.deepcopy(f)
@@ -18,8 +20,42 @@ def merge_in_one(fs, name, addsf, dellsf, progress):
         progress.emit(f"start merging with function {add_function.name}")
         merge_two_funcs(start_f, add_function, progress)
         progress.emit(f"merging with function {add_function.name} completed")
+
+    for delf in delsf:
+        for func in fs:
+            if delf == func.name:
+                del_function = copy.deepcopy(func)
+                break
+        progress.emit(f"start deleting function {del_function.name} from source")
+        progress.emit(f"Warning: deleting is possible only if functions were not merged! And if function has less than 2 arguments!")
+        delete_f(start_f, del_function, progress)
+        progress.emit(f"deleting function {del_function.name} completed")
+
     progress.emit(f"merging completed")
     return start_f
+
+def delete_f(dest: Function, source: Function, progress):
+    if len(source.params) > 1:
+        progress.emit(f"Error: deleting function {source.name} is not possible!")
+        return
+
+    for l in dest.labels:
+        for op in l.operations[::-1]:
+            if op.name == source.name:
+                progress.emit(f"found instance of function {source.name}")
+                rename_front_arg(dest, op.value, op.args[0], l.operations.index(op)+1, dest.labels.index(l))
+                l.operations.pop(l.operations.index(op))
+    
+    with open("F:\\STU\\FIIT\\BP\\dell_func.txt", "w") as f:
+        f.write(dest.name)
+        f.write('\n')
+        f.write(str(dest.params))
+        f.write('\n')
+        for label in dest.labels:
+            f.write('   '+label.name+'\n')
+            for op in label.operations:
+                f.write('      '+op.name+': '+op.value+'\n')
+                if op.args is not None: f.write('         '+str(op.args)+'\n')
 
 def merge_two_funcs(dest: Function, source: Function, progress):
     if len(source.labels) > 1:
