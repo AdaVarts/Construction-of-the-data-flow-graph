@@ -27,7 +27,7 @@ def merge_in_one(fs, name, addsf, delsf, progress):
                 del_function = copy.deepcopy(func)
                 break
         progress.emit(f"start deleting function {del_function.name} from source")
-        progress.emit(f"Warning: deleting is possible only if functions were not merged! And if function has less than 2 arguments!")
+        # progress.emit(f"Warning: deleting is possible only if functions were not merged! And if function has less than 2 arguments!")
         delete_f(start_f, del_function, progress)
         progress.emit(f"deleting function {del_function.name} completed")
 

@@ -9,14 +9,19 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QListWidgetItem
 from classes import Function
+from first import start_DFG
 from function_manag import merge_in_one
 from worker import *
 
 class Ui_ConstructorWindow(object):
     def setupUi(self, MainWindow, fs=[]):
         self.fs = fs
+        self.function = None
+        self.dfg = None
+
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1130, 870)
         MainWindow.setMaximumSize(QtCore.QSize(1130, 870))
@@ -145,6 +150,8 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.lineDistance.setFont(font)
         self.lineDistance.setObjectName("lineDistance")
+        self.onlyInt = QIntValidator()
+        self.lineDistance.setValidator(self.onlyInt)
 
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
         self.label_8.setGeometry(QtCore.QRect(50, 470, 81, 16))
@@ -188,6 +195,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.btnDisplayDFG.setFont(font)
         self.btnDisplayDFG.setObjectName("btnDisplayDFG")
+        self.btnDisplayDFG.setEnabled = False
         
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
@@ -229,6 +237,7 @@ class Ui_ConstructorWindow(object):
         
         self.btnClearlDel.clicked.connect(self.unselectDel)
         self.btnGenerate.clicked.connect(self.generate)
+        self.btnFindNodes.clicked.connect(self.find_nodes)
         self.threadpool = QThreadPool()
 
     def retranslateUi(self, MainWindow):
@@ -277,12 +286,28 @@ class Ui_ConstructorWindow(object):
         self.textPrint.append(progress)
     
     def set_all(self, result: Function):
+        self.function = result
         self.textPrint.append("")
         self.lineFuncName.setText(result.name)
         self.lineInstrsNum.setText(str(len(result.labels[0].operations)))
         self.listArgs.addItems(result.params)
         self.lineRetValue.setText(result.labels[0].operations[-1].args[0])
 
+    def find_nodes(self):
+        distance = self.lineDistance.text()
+        if distance and self.function is not None:
+            worker = Worker(start_DFG, self.dfg, self.function, distance, self.lineRetValue.text())
+            worker.signals.result.connect(self.display_nodes)
+            worker.signals.progress.connect(self.reportProgress)
+            self.threadpool.start(worker)
+    
+    def display_nodes(self, nodes):
+        self.listFoundNodes.clear()
+        self.lineNodesNum.setText(str(len(nodes)))
+        for node in nodes:
+            self.listFoundNodes.addItem(str(node))
+            
+            
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)

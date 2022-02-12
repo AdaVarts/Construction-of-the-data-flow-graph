@@ -55,6 +55,7 @@ class MainWin(QtWidgets.QMainWindow):
 
     
     def clicked_build_module(self):
+        # self.ui.btnBuildDFG.setEnabled = False
         worker = Worker(parse_llvm, self.ui.linePathForLlvm.text())
         worker.signals.result.connect(self.open_constructW)
         worker.signals.progress.connect(self.reportProgress)
