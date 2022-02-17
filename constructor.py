@@ -12,7 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QListWidgetItem
 from classes import Function
-from first import start_DFG
+from first import create_dfg, get_path, start_DFG
 from function_manag import merge_in_one
 from worker import *
 
@@ -221,6 +221,12 @@ class Ui_ConstructorWindow(object):
         self.btnClearlDel.setFont(font)
         self.btnClearlDel.setObjectName("btnClearlDel")
 
+        self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
+        self.tableWidget.setGeometry(QtCore.QRect(370, 290, 711, 551))
+        self.tableWidget.setObjectName("tableWidget")
+        self.tableWidget.setColumnCount(0)
+        self.tableWidget.setRowCount(0)
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -238,6 +244,8 @@ class Ui_ConstructorWindow(object):
         self.btnClearlDel.clicked.connect(self.unselectDel)
         self.btnGenerate.clicked.connect(self.generate)
         self.btnFindNodes.clicked.connect(self.find_nodes)
+        self.btnDisplayDFG.clicked.connect(self.show_dfg_path)
+
         self.threadpool = QThreadPool()
 
     def retranslateUi(self, MainWindow):
@@ -269,10 +277,13 @@ class Ui_ConstructorWindow(object):
         self.listFunctDel.clearFocus()
 
     def generate(self):
+        self.dfg = None
         self.lineFuncName.setText('')
         self.lineInstrsNum.setText('')
         self.listArgs.clear()
         self.lineRetValue.setText('')
+        self.listFoundNodes.clear()
+
         if len(self.listFunctions.selectedItems()) == 1:
             addf = self.listFunctAdd.selectedItems()
             delf = self.listFunctDel.selectedItems()
@@ -296,16 +307,38 @@ class Ui_ConstructorWindow(object):
     def find_nodes(self):
         distance = self.lineDistance.text()
         if distance and self.function is not None:
-            worker = Worker(start_DFG, self.dfg, self.function, distance, self.lineRetValue.text())
-            worker.signals.result.connect(self.display_nodes)
+            worker = Worker(create_dfg, self.function)
+            worker.signals.result.connect(self.save_dfg)
             worker.signals.progress.connect(self.reportProgress)
             self.threadpool.start(worker)
+
+    def save_dfg(self, dfg):
+        self.dfg = dfg
+
+        distance = self.lineDistance.text()
+        worker = Worker(start_DFG, self.dfg, self.function, distance, self.lineRetValue.text())
+        worker.signals.result.connect(self.display_nodes)
+        worker.signals.progress.connect(self.reportProgress)
+        self.threadpool.start(worker)
     
     def display_nodes(self, nodes):
         self.listFoundNodes.clear()
         self.lineNodesNum.setText(str(len(nodes)))
         for node in nodes:
             self.listFoundNodes.addItem(str(node))
+    
+    def show_dfg_path(self):
+        if len(self.listFoundNodes.selectedItems()) == 1 and self.dfg is not None:
+            distance = self.lineDistance.text()
+            value = self.listFoundNodes.selectedItems()[0].text()
+            worker = Worker(get_path, self.dfg, distance, value, self.lineRetValue.text())
+            worker.signals.result.connect(self.display_path)
+            worker.signals.progress.connect(self.reportProgress)
+            self.threadpool.start(worker)
+    
+    def display_path(self, nodes):
+        for node in nodes:
+            print(node.__str__())
             
             
 if __name__ == "__main__":

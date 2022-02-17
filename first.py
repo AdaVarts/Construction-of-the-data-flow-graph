@@ -52,12 +52,12 @@ def save_two_tails(dfg, op):
 
 def start_DFG(dfg_def, function, distance, ret_value, progress):
     if dfg_def == None:
-        dfg = create_dfg(function)
+        dfg_def = create_dfg(function, progress)
     
 
     k = 0
     nodes = []
-    ret_node = dfg.nodes[ret_value]
+    ret_node = dfg_def.nodes[ret_value]
     dfs(ret_node, k, int(distance), nodes)
     return nodes
 
@@ -69,8 +69,9 @@ def dfs(node, k, distance, found_nodes):
         if k >= distance: continue
         dfs(edge.tail, k+1, distance, found_nodes)
 
-def create_dfg(function):
+def create_dfg(function, progress):
     dfg = DFG()
+    progress.emit("Data Flow Graph: starting to build")
     for op in function.labels[0].operations:
         try:
             if op.name == 'store':
@@ -96,9 +97,27 @@ def create_dfg(function):
                 save_one_tail(0, dfg, op)
         except Exception as e:
             raise ValueError(f"{op.name}  -   {op.value} ; {op.args}  {format(e)}")
-            
+    progress.emit("Data Flow Graph: was built")
     print(dfg.__str__())
     return dfg
+
+def get_path(dfg, distance, value, ret_value, progress):
+    path = []
+    ret_node = dfg.nodes[ret_value]
+    dfs_for_path(ret_node, 0, int(distance), value, path)
+    return path
+
+def dfs_for_path(node: Node, k, distance, value, path):
+    for edge in node.incoming:
+        if k+1 == distance and edge.tail.name == value:
+            path.append(edge.tail)
+            return True
+        if k >= distance: continue
+        found = dfs_for_path(edge.tail, k+1, distance, value, path)
+        if found == True:
+            path.append(edge.tail)
+            return True
+    return False
 
 def convert_C_into_llvm(filename, printW):
     module = translate_to_c(filename, printW)
