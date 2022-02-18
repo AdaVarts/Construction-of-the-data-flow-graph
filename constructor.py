@@ -11,6 +11,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QListWidgetItem
+
 from classes import Function
 from first import create_dfg, get_path, start_DFG
 from function_manag import merge_in_one
@@ -224,8 +225,21 @@ class Ui_ConstructorWindow(object):
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(370, 290, 711, 551))
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setColumnCount(0)
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(0)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(0, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(1, item)
+        item = QtWidgets.QTableWidgetItem()
+        self.tableWidget.setHorizontalHeaderItem(2, item)
+        header = self.tableWidget.horizontalHeader()
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
+        self.tableWidget.verticalHeader().setVisible(False)
+        self.tableWidget.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -267,6 +281,12 @@ class Ui_ConstructorWindow(object):
         self.btnClearlDel.setText(_translate("MainWindow", "Clear"))
         self.btnClearlAdd.setText(_translate("MainWindow", "Clear"))
         self.menuBack.setTitle(_translate("MainWindow", "Back"))
+        item = self.tableWidget.horizontalHeaderItem(0)
+        item.setText(_translate("MainWindow", "Type"))
+        item = self.tableWidget.horizontalHeaderItem(1)
+        item.setText(_translate("MainWindow", "Value"))
+        item = self.tableWidget.horizontalHeaderItem(2)
+        item.setText(_translate("MainWindow", "Distance"))
     
     def unselectAdd(self):
         self.listFunctAdd.clearSelection()
@@ -280,6 +300,7 @@ class Ui_ConstructorWindow(object):
         self.dfg = None
         self.lineFuncName.setText('')
         self.lineInstrsNum.setText('')
+        self.lineDistance.setText('')
         self.listArgs.clear()
         self.lineRetValue.setText('')
         self.listFoundNodes.clear()
@@ -331,14 +352,51 @@ class Ui_ConstructorWindow(object):
         if len(self.listFoundNodes.selectedItems()) == 1 and self.dfg is not None:
             distance = self.lineDistance.text()
             value = self.listFoundNodes.selectedItems()[0].text()
-            worker = Worker(get_path, self.dfg, distance, value, self.lineRetValue.text())
+
+            index = self.listFoundNodes.selectedIndexes()[0].row()
+            number = 1
+            for i in range(0, index):
+                if self.listFoundNodes.item(i).text() == value:
+                    number += 1
+
+            worker = Worker(get_path, self.dfg, distance, value, self.lineRetValue.text(), number)
             worker.signals.result.connect(self.display_path)
             worker.signals.progress.connect(self.reportProgress)
             self.threadpool.start(worker)
     
     def display_path(self, nodes):
-        for node in nodes:
-            print(node.__str__())
+        x = 0
+        for key, node in nodes.items():
+            print(str(key)+"  "+node.__str__())
+            self.tableWidget.setRowCount(x+2)
+            item = QtWidgets.QTableWidgetItem()
+            self.tableWidget.setVerticalHeaderItem(x, item)
+            item = QtWidgets.QTableWidgetItem()
+            self.tableWidget.setVerticalHeaderItem(x+1, item)
+
+            item3 = QtWidgets.QTableWidgetItem()
+            item3.setTextAlignment(Qt.AlignCenter)
+            item3.setText("n")
+            self.tableWidget.setItem(x, 0, item3)
+
+            item4 = QtWidgets.QTableWidgetItem()
+            item4.setText(node[0].name)
+            self.tableWidget.setItem(x, 1, item4)
+            item5 = QtWidgets.QTableWidgetItem()
+            item5.setText(str(key))
+            item5.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(x, 2, item5)
+
+            item6 = QtWidgets.QTableWidgetItem()
+            item6.setText("e")
+            item6.setTextAlignment(Qt.AlignCenter)
+            self.tableWidget.setItem(x+1, 0, item6)
+            item7 = QtWidgets.QTableWidgetItem()
+            item7.setText(node[1].name)
+            self.tableWidget.setItem(x+1, 1, item7)
+
+            x += 2
+        
             
             
 if __name__ == "__main__":

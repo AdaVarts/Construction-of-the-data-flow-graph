@@ -1,7 +1,7 @@
 # from msilib.schema import Error
 # import llvmlite
 import copy
-from function_manag import merge_two_funcs
+from function_manag import merge_in_one, merge_two_funcs
 from llvm_parser import parse_llvm
 from pycparser import parse_file#, preprocess_file
 # import pyparsing as pp
@@ -40,8 +40,11 @@ def save_node(dfg, name):
 
 def save_one_tail(index, dfg, op):
     dfg, node = save_node(dfg, op.value)
-    dfg, node1 = save_node(dfg, op.args[index])
-    edge = Edge(op.name, node1, node) 
+    try:
+        dfg, node1 = save_node(dfg, op.args[index])
+        edge = Edge(op.name, node1, node) 
+    except:
+        edge = Edge(op.name, None, node) 
     dfg.edges.append(edge)   
     return dfg
 
@@ -57,8 +60,14 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
 
     k = 0
     nodes = []
-    ret_node = dfg_def.nodes[ret_value]
+    try:
+        ret_node = dfg_def.nodes[ret_value]
+    except:
+        progress.emit(f"Error: returning node is not found")
+        return []
+    progress.emit(f"starting DFS to length {distance}")
     dfs(ret_node, k, int(distance), nodes)
+    progress.emit(f"DFS has finished")
     return nodes
 
 def dfs(node, k, distance, found_nodes):
@@ -66,7 +75,7 @@ def dfs(node, k, distance, found_nodes):
         if k+1 == distance:
             found_nodes.append(edge.tail)
             continue
-        if k >= distance: continue
+        if k >= distance: return
         dfs(edge.tail, k+1, distance, found_nodes)
 
 def create_dfg(function, progress):
@@ -98,26 +107,30 @@ def create_dfg(function, progress):
         except Exception as e:
             raise ValueError(f"{op.name}  -   {op.value} ; {op.args}  {format(e)}")
     progress.emit("Data Flow Graph: was built")
-    print(dfg.__str__())
+    # print(dfg.__str__())
     return dfg
 
-def get_path(dfg, distance, value, ret_value, progress):
-    path = []
+def get_path(dfg, distance, value, ret_value, number, progress):
+    path = {}
     ret_node = dfg.nodes[ret_value]
-    dfs_for_path(ret_node, 0, int(distance), value, path)
+    dfs_for_path(ret_node, 0, int(distance), value, 0, number, path)
     return path
 
-def dfs_for_path(node: Node, k, distance, value, path):
+def dfs_for_path(node: Node, k, distance, value, found_n, number, path):
     for edge in node.incoming:
         if k+1 == distance and edge.tail.name == value:
-            path.append(edge.tail)
-            return True
-        if k >= distance: continue
-        found = dfs_for_path(edge.tail, k+1, distance, value, path)
-        if found == True:
-            path.append(edge.tail)
-            return True
-    return False
+            found_n += 1
+            if number == 0 or found_n == number:
+                path[k+1] = [edge.tail, edge]
+                return found_n
+            else: continue
+        if k >= distance:
+            return found_n
+        found_n = dfs_for_path(edge.tail, k+1, distance, value, found_n, number, path)
+        if found_n == number:
+            path[k+1] = [edge.tail, edge]
+            return found_n
+    return found_n
 
 def convert_C_into_llvm(filename, printW):
     module = translate_to_c(filename, printW)
@@ -139,12 +152,17 @@ if __name__ == "__main__":
     # print(m)
     sss = WorkerSignals()
     functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
-    for f in functions:
-        if f.name == 'encrypt':
-            encrypt_f = copy.deepcopy(f)
-        if f.name == 'Sbox':
-            sbox_f = copy.deepcopy(f)
-    merge_two_funcs(encrypt_f, sbox_f, sss.progress)
+    # for f in functions:
+    #     if f.name == 'encrypt':
+    #         encrypt_f = copy.deepcopy(f)
+    #     if f.name == 'Sbox':
+    #         sbox_f = copy.deepcopy(f)
+    func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
+    # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
+    dfg = create_dfg(func, sss.progress)
+    path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
+    for i, n in path.items():
+        print(n)
     # for f in functions:
     #     if f.name == 'encrypt':
     #         start_DFG(f)
