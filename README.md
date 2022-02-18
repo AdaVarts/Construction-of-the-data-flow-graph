@@ -14,7 +14,9 @@ The first list determines the function, from which DFG will be constructed.</br>
 The second list offers the option to unroll other functions in the main one if they are called.</br>
 The third list offers the option to delete a specific function from the main one. All instances of calling this function in the main one will be excluded.</br>
 Warning: deleting will be not executed if functions were already merged, or if a function to be deleted has more than 1 argument.</br>
-Button `Generate model` will run merging and deleting chosen functions from the main one. It will trigger auto-filling of fields below describing the final function.
+Button `Generate model` runs merging and deleting chosen functions from the main one. It will trigger auto-filling of fields below describing the final function.</br>
+By entering a 'distance value' and pressing `Find nodes` program will find all nodes that are at provided distance from returning node. The total number of found nodes will be written, and all nodes will be displayed in the list below.</br>
+If a user chooses 1 node from this list and press `Display DFG`, it will find a path between returning node and chosen one, subsequently display it in the table on the right.
 
 ## Customisation 
 excluding memory management operations</br>
