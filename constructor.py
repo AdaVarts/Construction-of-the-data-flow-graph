@@ -10,7 +10,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QListWidgetItem
+from PyQt5.QtWidgets import QListWidgetItem, QToolBar
 
 from classes import Function
 from first import create_dfg, get_path, start_DFG
@@ -191,7 +191,7 @@ class Ui_ConstructorWindow(object):
         self.listFoundNodes.setObjectName("listFoundNodes")
 
         self.btnDisplayDFG = QtWidgets.QPushButton(self.centralwidget)
-        self.btnDisplayDFG.setGeometry(QtCore.QRect(120, 810, 131, 31))
+        self.btnDisplayDFG.setGeometry(QtCore.QRect(120, 810, 131, 31)) # (700, 230, 131, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.btnDisplayDFG.setFont(font)
@@ -199,13 +199,26 @@ class Ui_ConstructorWindow(object):
         self.btnDisplayDFG.setEnabled = False
         
         MainWindow.setCentralWidget(self.centralwidget)
+        # toolbar = QToolBar("My main toolbar")
+        # self.addToolBar(toolbar)
+
+        # button_action = QtWidgets.QAction("Your button", self)
+        # button_action.setStatusTip("This is your button")
+        # button_action.triggered.connect(self.onMyToolBarButtonClick)
+        # toolbar.addAction(button_action)
+
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1128, 21))
         self.menubar.setObjectName("menubar")
-        self.menuBack = QtWidgets.QMenu(self.menubar)
-        self.menuBack.setObjectName("menuBack")
+
+        # self.menuBack = QtWidgets.QMenu(self.menubar)
+        # self.menuBack.setObjectName("menuBack")
         MainWindow.setMenuBar(self.menubar)
-        self.menubar.addAction(self.menuBack.menuAction())
+        self.actionBack = QtWidgets.QAction(MainWindow)
+        self.actionBack.setObjectName("actionBack")
+        # self.menuBack.addAction(self.actionBack)
+
+        self.menubar.addAction(self.actionBack)
 
         self.btnClearlAdd = QtWidgets.QPushButton(self.centralwidget)
         self.btnClearlAdd.setGeometry(QtCore.QRect(250, 240, 161, 21))
@@ -280,14 +293,15 @@ class Ui_ConstructorWindow(object):
         self.btnDisplayDFG.setText(_translate("MainWindow", "Display DFG"))
         self.btnClearlDel.setText(_translate("MainWindow", "Clear"))
         self.btnClearlAdd.setText(_translate("MainWindow", "Clear"))
-        self.menuBack.setTitle(_translate("MainWindow", "Back"))
+        # self.menuBack.setTitle(_translate("MainWindow", "Home"))
+        self.actionBack.setText(_translate("MainWindow", "Back"))
         item = self.tableWidget.horizontalHeaderItem(0)
         item.setText(_translate("MainWindow", "Type"))
         item = self.tableWidget.horizontalHeaderItem(1)
         item.setText(_translate("MainWindow", "Value"))
         item = self.tableWidget.horizontalHeaderItem(2)
         item.setText(_translate("MainWindow", "Distance"))
-    
+
     def unselectAdd(self):
         self.listFunctAdd.clearSelection()
         self.listFunctAdd.clearFocus()
@@ -304,6 +318,7 @@ class Ui_ConstructorWindow(object):
         self.listArgs.clear()
         self.lineRetValue.setText('')
         self.listFoundNodes.clear()
+        self.lineNodesNum.setText('')
 
         if len(self.listFunctions.selectedItems()) == 1:
             addf = self.listFunctAdd.selectedItems()
@@ -393,6 +408,7 @@ class Ui_ConstructorWindow(object):
             self.tableWidget.setItem(x+1, 0, item6)
             item7 = QtWidgets.QTableWidgetItem()
             item7.setText(node[1].name)
+            item7.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(x+1, 1, item7)
 
             x += 2

@@ -1,3 +1,5 @@
+from classes import Operation
+
 def memory_manag(fs, k_fs):
     val = None
     index = None
@@ -6,6 +8,24 @@ def memory_manag(fs, k_fs):
             for op in l.operations[::-1]:
                 if op.name in ['printf', 'sprintf', 'free', 'puts']:
                     l.operations.pop(l.operations.index(op))
+
+    for f in fs:
+        for l in f.labels:
+            for op in l.operations[::-1]:
+                if op.name == 'bitcast':
+                    rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
+                    rename_front_val(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
+                    print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
+                    l.operations.pop(l.operations.index(op))
+
+    for f in fs:
+        for l in f.labels:
+            for op in l.operations[::-1]:
+                if op.name == 'trunc' or op.name == 'sext':
+                    rename_front_arg(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
+                    print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
+                    l.operations.pop(l.operations.index(op))
+
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -19,28 +39,13 @@ def memory_manag(fs, k_fs):
                         rename_front_arg(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
+
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
                 if op.name == 'load':
                     rename_front_arg(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
-                    print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
-                    l.operations.pop(l.operations.index(op))
-
-    for f in fs:
-        for l in f.labels:
-            for op in l.operations[::-1]:
-                if op.name == 'bitcast':
-                    rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
-                    rename_front_val(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
-                    print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
-                    l.operations.pop(l.operations.index(op))
-    
-    for f in fs:
-        for l in f.labels:
-            for op in l.operations[::-1]:
-                if op.name == 'trunc' or op.name == 'sext':
-                    rename_front_arg(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
+                    rename_front_val(f, op.args[0], op.value, l.operations.index(op)+1, f.labels.index(l))
                     print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                     l.operations.pop(l.operations.index(op))
 
@@ -49,7 +54,7 @@ def memory_manag(fs, k_fs):
             for op in l.operations[::-1]:
                 if op.name == 'store':
                     if (is_used_backw(f, op.args[0], l.operations.index(op)-1, f.labels.index(l)) and
-                       not is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l))):
+                       is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l)) is False):
                         rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
@@ -57,6 +62,17 @@ def memory_manag(fs, k_fs):
                         # rename_backw(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
+
+    # to replace storing the element of array in got element   to   storing directly into array
+    for f in fs:
+        for l in f.labels:
+            for op in l.operations[::-1]:
+                val = is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l))
+                if op.name == 'store' and val is not False:
+                    op.value = val
+                    # another option to store into got element and directly into array
+                    # l.operations.insert(l.operations.index(op)+1, Operation("store", val, op.args))
+
     return fs
 
 def is_used_backw(f, val, index_op, index_l):
@@ -108,11 +124,11 @@ def is_used_front(f, val, index_op, index_l):
 def is_arr(f, val, index_op, index_l):
     for j in range(index_op, -1, -1):
         if val == f.labels[index_l].operations[j].value and f.labels[index_l].operations[j].name == 'getelementptr':
-            return True
+            return f.labels[index_l].operations[j].args[0]
     for i in range(index_l-1, -1, -1):
         for j in range(len(f.labels[i].operations)-1, -1, -1):
             if val == f.labels[i].operations[j].value and f.labels[i].operations[j].name == 'getelementptr':
-                return True
+                return f.labels[i].operations[j].args[0]
     return False
 
 def rename_backw_val(f, val, arg, index_op, index_l):

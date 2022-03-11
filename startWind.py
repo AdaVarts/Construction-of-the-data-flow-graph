@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from constructor import Ui_ConstructorWindow
 from llvm_parser import parse_llvm
-from main import Ui_MainWindow
+from startingWindowGUI import Ui_MainWindow
 from first import convert_C_into_llvm
 from worker import *
 
@@ -37,6 +37,7 @@ class MainWin(QtWidgets.QMainWindow):
             self.ui.linePathForLlvm.setText(fileName)
 
     def clicked_convert_into_llvm(self):
+        self.ui.btnConvInLlvm.setEnabled(False)
         worker = Worker(convert_C_into_llvm, self.ui.linePathForC.text())
         worker.signals.result.connect(self.save)
         worker.signals.progress.connect(self.reportProgress)
@@ -55,7 +56,7 @@ class MainWin(QtWidgets.QMainWindow):
 
     
     def clicked_build_module(self):
-        # self.ui.btnBuildDFG.setEnabled = False
+        self.ui.btnBuildDFG.setEnabled(False)
         worker = Worker(parse_llvm, self.ui.linePathForLlvm.text())
         worker.signals.result.connect(self.open_constructW)
         worker.signals.progress.connect(self.reportProgress)
@@ -67,6 +68,7 @@ class MainWin(QtWidgets.QMainWindow):
         # self.ui.butAdd.clicked.connect(self.clicked_add_product)
         # self.ui.tableWidget.itemDoubleClicked.connect(self.clicked_open_product)
         # self.ui.butHome.clicked.connect(self.open_main)
+        self.ui.actionBack.triggered.connect(self.open_main)
 
 
 if __name__=="__main__":

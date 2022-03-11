@@ -2,6 +2,7 @@ import copy
 from classes import Function, Operation, Label
 from memory_management import memory_manag, rename_front_arg
 from addit_methods import *
+from worker import WorkerSignals
 
 def load_llvm(filename, progress):
     functions = []
@@ -299,3 +300,6 @@ def parse_llvm(filename, progress):
     fs, k_fs = load_llvm(filename, progress)
     fs = unroll_llvm(fs, k_fs, progress)
     return fs
+
+# sss = WorkerSignals()
+# functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)

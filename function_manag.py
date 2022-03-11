@@ -59,8 +59,8 @@ def delete_f(dest: Function, source: Function, progress):
 
 def merge_two_funcs(dest: Function, source: Function, progress):
     if len(source.labels) > 1:
-        progress.emit("Error: The targeted function has more than 1 lable")
-        # LOGGER.error("The targeted function has more than 1 lable")
+        progress.emit("Error: The targeted function has more than 1 label")
+        # LOGGER.error("The targeted function has more than 1 label")
     else:
         substitute(dest, source, 0, 0, 0, progress)
 

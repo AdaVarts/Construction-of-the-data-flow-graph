@@ -4,21 +4,21 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1300, 300)
-        MainWindow.setMinimumSize(QtCore.QSize(1300, 300))
-        MainWindow.setMaximumSize(QtCore.QSize(1300, 300))
+        MainWindow.resize(1130, 870)
+        # MainWindow.setMinimumSize(QtCore.QSize(1300, 300))
+        MainWindow.setMaximumSize(QtCore.QSize(1230, 870))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         
         self.btnChooseC = QtWidgets.QPushButton(self.centralwidget)
-        self.btnChooseC.setGeometry(QtCore.QRect(690, 40, 91, 31))
+        self.btnChooseC.setGeometry(QtCore.QRect(650, 40, 91, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.btnChooseC.setFont(font)
         self.btnChooseC.setObjectName("btnChooseC")
 
         self.linePathForC = QtWidgets.QLineEdit(self.centralwidget)
-        self.linePathForC.setGeometry(QtCore.QRect(20, 40, 651, 31))
+        self.linePathForC.setGeometry(QtCore.QRect(20, 40, 611, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.linePathForC.setFont(font)
@@ -27,7 +27,7 @@ class Ui_MainWindow(object):
 
         self.btnBuildDFG = QtWidgets.QPushButton(self.centralwidget)
         self.btnBuildDFG.setEnabled(False)
-        self.btnBuildDFG.setGeometry(QtCore.QRect(320, 250, 91, 31))
+        self.btnBuildDFG.setGeometry(QtCore.QRect(270, 250, 161, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.btnBuildDFG.setFont(font)
@@ -35,14 +35,14 @@ class Ui_MainWindow(object):
 
         self.btnConvInLlvm = QtWidgets.QPushButton(self.centralwidget)
         self.btnConvInLlvm.setEnabled(False)
-        self.btnConvInLlvm.setGeometry(QtCore.QRect(290, 90, 161, 31))
+        self.btnConvInLlvm.setGeometry(QtCore.QRect(270, 90, 161, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.btnConvInLlvm.setFont(font)
         self.btnConvInLlvm.setObjectName("btnConvInLlvm")
 
         self.linePathForLlvm = QtWidgets.QLineEdit(self.centralwidget)
-        self.linePathForLlvm.setGeometry(QtCore.QRect(20, 200, 651, 31))
+        self.linePathForLlvm.setGeometry(QtCore.QRect(20, 200, 611, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.linePathForLlvm.setFont(font)
@@ -50,7 +50,7 @@ class Ui_MainWindow(object):
         self.linePathForLlvm.setObjectName("linePathForLlvm")
         
         self.btnChooseLlvm = QtWidgets.QPushButton(self.centralwidget)
-        self.btnChooseLlvm.setGeometry(QtCore.QRect(690, 200, 91, 31))
+        self.btnChooseLlvm.setGeometry(QtCore.QRect(650, 200, 91, 31))
         font = QtGui.QFont()
         font.setPointSize(10)
         self.btnChooseLlvm.setFont(font)
@@ -58,7 +58,7 @@ class Ui_MainWindow(object):
 
         self.textPrint = QtWidgets.QTextEdit(self.centralwidget)
         self.textPrint.setEnabled(True)
-        self.textPrint.setGeometry(QtCore.QRect(820, 40, 441, 211))
+        self.textPrint.setGeometry(QtCore.QRect(760, 40, 350, 211))
         self.textPrint.setMaximumSize(QtCore.QSize(441, 211))
         self.textPrint.setReadOnly(True)
         font = QtGui.QFont()
@@ -87,7 +87,7 @@ class Ui_MainWindow(object):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "DFGConstructor"))
         self.btnChooseC.setText(_translate("MainWindow", "Choose file"))
-        self.btnBuildDFG.setText(_translate("MainWindow", "Build DFG"))
+        self.btnBuildDFG.setText(_translate("MainWindow", "Load LLVM module"))
         self.btnConvInLlvm.setText(_translate("MainWindow", "Convert into LLVM IR"))
         self.btnChooseLlvm.setText(_translate("MainWindow", "Choose file"))
         self.label.setText(_translate("MainWindow", "Load file in C"))
