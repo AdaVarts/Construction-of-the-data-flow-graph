@@ -24,7 +24,8 @@ def translate_to_c(filename, printW):
     # f.close()
 
     generator = llvm_g.llvm_Generator(printW)
-    return generator.start(st)
+    generator.visit(st)
+    return generator.llvm_module
 
 def get_function(module, name_f):
     for f in module.functions:
@@ -105,7 +106,8 @@ def create_dfg(function, progress):
             else:
                 save_one_tail(0, dfg, op)
         except Exception as e:
-            raise ValueError(f"{op.name}  -   {op.value} ; {op.args}  {format(e)}")
+            progress.emit(f"ValueError: {op.name}  -   {op.value} ; {op.args}  {format(e)}")
+            # raise ValueError(f"{op.name}  -   {op.value} ; {op.args}  {format(e)}")
     progress.emit("Data Flow Graph: was built")
     # print(dfg.__str__())
     return dfg
@@ -137,32 +139,39 @@ def convert_C_into_llvm(filename, printW):
     m = module.__str__()
     return m
 
-# if __name__ == "__main__":
-#     # module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c")
-#     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
+if __name__ == "__main__":
+    sss = WorkerSignals()
+    
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
+    # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
-#     # m = module.__str__()
-#     # llvm_ir_parsed = binding.parse_assembly(str(module))
-#     # llvm_ir_parsed.verify()
+    m = module.__str__()
+    # llvm_ir_parsed = binding.parse_assembly(str(module))
+    # llvm_ir_parsed.verify()
 
 
-#     # f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", "w")
-#     # f1.write(m)
-#     # f1.close()
-#     # print(m)
-#     sss = WorkerSignals()
-#     functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
-#     # for f in functions:
-#     #     if f.name == 'encrypt':
-#     #         encrypt_f = copy.deepcopy(f)
-#     #     if f.name == 'Sbox':
-#     #         sbox_f = copy.deepcopy(f)
-#     func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
-#     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
-#     dfg = create_dfg(func, sss.progress)
-#     path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
-#     for i, n in path.items():
-#         print(n)
-#     # for f in functions:
-#     #     if f.name == 'encrypt':
-#     #         start_DFG(f)
+    # f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", "w")
+    # f1.write(m)
+    # f1.close()
+    # print(m)
+
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
+    
+    # for f in functions:
+    #     if f.name == 'encrypt':
+    #         encrypt_f = copy.deepcopy(f)
+    #     if f.name == 'Sbox':
+    #         sbox_f = copy.deepcopy(f)
+    
+    # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
+    
+    # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
+    
+    # dfg = create_dfg(func, sss.progress)
+    # path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
+    # for i, n in path.items():
+        # print(n)
+    
+    # for f in functions:
+    #     if f.name == 'encrypt':
+    #         start_DFG(f)
