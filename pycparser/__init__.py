@@ -110,7 +110,7 @@ def compare_replace(text, text2):
         text_ret += line + '\n'
     return text_ret
 
-def remove_annotation(text, filename):
+def remove_annotation(text):
 
     UNNESS = ["__ext", "__dl", "bute__((__cd", "__att", "__res", "__unu",  "__nothrow__", "extern", "signed"]
     # UN_LINE = ["__non", "__inline__", "__attribute__((__format__"]
@@ -178,9 +178,9 @@ def parse_file(filename, use_cpp=False, cpp_path='cpp', cpp_args='',
         with io.open(filename) as f:
             text = f.read()
 
-    text = remove_annotation(text, filename)
+    text = remove_annotation(text)
     if integer_types:
-        text2 = remove_annotation(text2, filename)
+        text2 = remove_annotation(text2)
         text = compare_replace(text, text2)
         file2 = open("preprocesse.c", "w") 
         file2.write(text2)

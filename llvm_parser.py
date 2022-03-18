@@ -259,6 +259,19 @@ def unroll_llvm(fs, known_funcs, progress):
                     if len(op.args) > 1 and not is_constant(op.args[1]):
                         op.args[1] = f.name+'_'+op.args[1]
     progress.emit("end function identification")
+
+    with open("F:\\STU\\FIIT\\BP\\func_id.txt", "w") as f:
+        for func in fs:
+            f.write(func.name)
+            f.write('\n')
+            f.write(str(func.params))
+            f.write('\n')
+            for label in func.labels:
+                f.write('   '+label.name+'\n')
+                for op in label.operations:
+                    f.write('      '+op.name+': '+op.value+'\n')
+                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+
     progress.emit("start unrolling")
     for f in fs:
         functions.append(Function(f.name, f.params))
@@ -267,6 +280,18 @@ def unroll_llvm(fs, known_funcs, progress):
         functions[-1].labels.append(Label(set_new_name(f.labels[0].name, functions[-1].ssa_map_lbl)))
         functions = unroll_label(f, functions, f.labels[0])
     progress.emit("end unrolling")
+
+    with open("F:\\STU\\FIIT\\BP\\output_unroll_before_ssa.txt", "w") as f:
+        for func in functions:
+            f.write(func.name)
+            f.write('\n')
+            f.write(str(func.params))
+            f.write('\n')
+            for label in func.labels:
+                f.write('   '+label.name+'\n')
+                for op in label.operations:
+                    f.write('      '+op.name+': '+op.value+'\n')
+                    if op.args is not None: f.write('         '+str(op.args)+'\n')
 
     
     progress.emit("start variable identification")
