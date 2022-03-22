@@ -1,6 +1,8 @@
 # from msilib.schema import Error
 # import llvmlite
 import copy
+import typing
+from addit_methods import is_constant
 from function_manag import merge_in_one, merge_two_funcs
 from llvm_parser import parse_llvm
 from pycparser import parse_file#, preprocess_file
@@ -60,24 +62,44 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
     
 
     k = 0
-    nodes = []
     try:
         ret_node = dfg_def.nodes[ret_value]
     except:
         progress.emit(f"Error: returning node is not found")
         return []
     progress.emit(f"starting DFS to length {distance}")
-    dfs(ret_node, k, int(distance), nodes)
+    path = []
+    nodes = []
+    dfs(ret_node, k, int(distance), path, dfg_def.map_path)
+    # dfs(ret_node, k, int(distance), nodes)
     progress.emit(f"DFS has finished")
-    return nodes
+    return dfg_def
+    # return nodes
 
-def dfs(node, k, distance, found_nodes):
+# def dfs(node, k, distance, found_nodes):
+#     for edge in node.incoming:
+#         if k+1 == distance:
+#             if edge.tail not in found_nodes or is_constant(edge.tail.name):
+#                 found_nodes.append(edge.tail)
+#             continue
+#         if k >= distance: return
+#         dfs(edge.tail, k+1, distance, found_nodes)
+
+def dfs(node, k, distance, path, map_path):
     for edge in node.incoming:
         if k+1 == distance:
-            found_nodes.append(edge.tail)
+            path.append([k+1, edge.tail, edge])
+            if edge.tail.name not in map_path:
+                map_path[edge.tail.name] = []
+                map_path[edge.tail.name].append([item for item in path])
+            elif is_constant(edge.tail.name):
+                map_path[edge.tail.name].append([item for item in path])
+            path.pop()
             continue
         if k >= distance: return
-        dfs(edge.tail, k+1, distance, found_nodes)
+        path.append([k+1, edge.tail, edge])
+        dfs(edge.tail, k+1, distance, path, map_path)
+        path.pop()
 
 def create_dfg(function, progress):
     dfg = DFG()
@@ -107,32 +129,10 @@ def create_dfg(function, progress):
                 save_one_tail(0, dfg, op)
         except Exception as e:
             progress.emit(f"ValueError: {op.name}  -   {op.value} ; {op.args}  {format(e)}")
-            # raise ValueError(f"{op.name}  -   {op.value} ; {op.args}  {format(e)}")
     progress.emit("Data Flow Graph: was built")
     # print(dfg.__str__())
     return dfg
 
-def get_path(dfg, distance, value, ret_value, number, progress):
-    path = {}
-    ret_node = dfg.nodes[ret_value]
-    dfs_for_path(ret_node, 0, int(distance), value, 0, number, path)
-    return path
-
-def dfs_for_path(node: Node, k, distance, value, found_n, number, path):
-    for edge in node.incoming:
-        if k+1 == distance and edge.tail.name == value:
-            found_n += 1
-            if number == 0 or found_n == number:
-                path[k+1] = [edge.tail, edge]
-                return found_n
-            else: continue
-        if k >= distance:
-            return found_n
-        found_n = dfs_for_path(edge.tail, k+1, distance, value, found_n, number, path)
-        if found_n == number:
-            path[k+1] = [edge.tail, edge]
-            return found_n
-    return found_n
 
 def convert_C_into_llvm(filename, printW):
     module = translate_to_c(filename, printW)
@@ -142,10 +142,10 @@ def convert_C_into_llvm(filename, printW):
 if __name__ == "__main__":
     sss = WorkerSignals()
     
-    module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
+#    module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
-    m = module.__str__()
+#    m = module.__str__()
     # llvm_ir_parsed = binding.parse_assembly(str(module))
     # llvm_ir_parsed.verify()
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     # f1.close()
     # print(m)
 
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
     
     # for f in functions:
     #     if f.name == 'encrypt':
@@ -163,11 +163,16 @@ if __name__ == "__main__":
     #     if f.name == 'Sbox':
     #         sbox_f = copy.deepcopy(f)
     
-    # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
+    func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     
-    # dfg = create_dfg(func, sss.progress)
+    dfg = create_dfg(func, sss.progress)
+    # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
+    # start_DFG(dfg, func, 5, f'encrypt_%state-63', sss.progress)
+    # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)
+    # start_DFG(dfg, func, 7, f'encrypt_%state-63', sss.progress)
+    start_DFG(dfg, func, 9, f'encrypt_%state-63', sss.progress)
     # path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
     # for i, n in path.items():
         # print(n)
