@@ -13,7 +13,7 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QListWidgetItem, QToolBar
 
 from classes import Function
-from first import create_dfg, get_path, start_DFG
+from first import create_dfg, start_DFG
 from function_manag import merge_in_one
 from worker import *
 
