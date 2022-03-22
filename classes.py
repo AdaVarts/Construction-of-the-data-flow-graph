@@ -4,10 +4,10 @@ class Function:
     def __init__(self, name, params):
         self.name = name
         self.params = params
-        self.labels = []
-        self.label_map = {}
-        self.ssa_map_lbl = {}
-        self.ssa_map_var = {}
+        self.labels: typing.List[Label] = []
+        self.label_map: typing.Dict[str, Label] = {}
+        self.ssa_map_lbl: typing.Dict[str, int] = {}
+        self.ssa_map_var: typing.Dict[str, int] = {}
     
     def init_ssamap(self, source_labels):
         for l in source_labels:
@@ -29,14 +29,14 @@ class Operation:
 class Label:
     def __init__(self, name):
         self.name = name
-        self.operations = []
+        self.operations: typing.List[Operation] = []
 
 # DFG structure
 class Node:
     def __init__(self, name):
         self.name = name
-        self.incoming = []
-        self.outgoing = []
+        self.incoming: typing.List[Edge] = []
+        self.outgoing: typing.List[Edge] = []
 
     def __str__(self) -> str:
         return self.name
@@ -55,8 +55,9 @@ class Edge:
 # node: name - variable+func.name; incom, outcom ::edge   +   edge:name - instr; tail, head ::node
 class DFG:
     def __init__(self):
-        self.edges: typing.List(Edge) = []
-        self.nodes: typing.Dict(str, Node) = {}
+        self.edges: typing.List[Edge] = []
+        self.nodes: typing.Dict[str, Node] = {}
+        self.map_path:typing.Dict[str, typing.List] = {}
 
     def get_node(self, node_name):
         if node_name in self.nodes:

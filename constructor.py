@@ -25,10 +25,11 @@ class Ui_ConstructorWindow(object):
 
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(1130, 870)
-        MainWindow.setMaximumSize(QtCore.QSize(1130, 870))
-        MainWindow.setMinimumSize(QtCore.QSize(1130, 870))
+        MainWindow.setMaximumSize(QtCore.QSize(1500, 870))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
 
         self.listFunctions = QtWidgets.QListWidget(self.centralwidget)
         self.listFunctions.setGeometry(QtCore.QRect(40, 40, 161, 221))
@@ -36,6 +37,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.listFunctions.setFont(font)
         self.listFunctions.setObjectName("listFunctions")
+        self.gridLayout.addWidget(self.listFunctions, 1, 0, 2, 2)
 
         self.listFunctAdd = QtWidgets.QListWidget(self.centralwidget)
         self.listFunctAdd.setGeometry(QtCore.QRect(250, 40, 161, 191))
@@ -43,6 +45,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.listFunctAdd.setFont(font)
         self.listFunctAdd.setObjectName("listFunctAdd")
+        self.gridLayout.addWidget(self.listFunctAdd, 1, 2, 1, 1)
 
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setGeometry(QtCore.QRect(50, 10, 131, 16))
@@ -50,6 +53,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label.setFont(font)
         self.label.setObjectName("label")
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 2)
         
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
         self.label_2.setGeometry(QtCore.QRect(260, 10, 161, 16))
@@ -57,6 +61,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
+        self.gridLayout.addWidget(self.label_2, 0, 2, 1, 1)
 
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
         self.label_3.setGeometry(QtCore.QRect(470, 10, 161, 16))
@@ -64,6 +69,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 0, 3, 1, 1)
 
         self.listFunctDel = QtWidgets.QListWidget(self.centralwidget)
         self.listFunctDel.setGeometry(QtCore.QRect(460, 40, 161, 191))
@@ -71,6 +77,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.listFunctDel.setFont(font)
         self.listFunctDel.setObjectName("listFunctDel")
+        self.gridLayout.addWidget(self.listFunctDel, 1, 3, 1, 1)
 
         self.btnGenerate = QtWidgets.QPushButton(self.centralwidget)
         self.btnGenerate.setGeometry(QtCore.QRect(820, 230, 131, 31))
@@ -78,6 +85,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.btnGenerate.setFont(font)
         self.btnGenerate.setObjectName("btnGenerate")
+        self.gridLayout.addWidget(self.btnGenerate, 2, 4, 1, 1)
 
         self.textPrint = QtWidgets.QTextEdit(self.centralwidget)
         self.textPrint.setGeometry(QtCore.QRect(690, 40, 391, 171))
@@ -85,6 +93,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.textPrint.setFont(font)
         self.textPrint.setObjectName("textPrint")
+        self.gridLayout.addWidget(self.textPrint, 1, 4, 1, 1)
 
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         self.label_4.setGeometry(QtCore.QRect(50, 290, 61, 16))
@@ -92,6 +101,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
+        self.gridLayout.addWidget(self.label_4, 3, 0, 1, 1)
 
         self.lineFuncName = QtWidgets.QLineEdit(self.centralwidget)
         self.lineFuncName.setGeometry(QtCore.QRect(180, 290, 151, 20))
@@ -100,6 +110,7 @@ class Ui_ConstructorWindow(object):
         self.lineFuncName.setFont(font)
         self.lineFuncName.setReadOnly(True)
         self.lineFuncName.setObjectName("lineFuncName")
+        self.gridLayout.addWidget(self.lineFuncName, 3, 1, 1, 2)
 
         self.label_5 = QtWidgets.QLabel(self.centralwidget)
         self.label_5.setGeometry(QtCore.QRect(50, 320, 71, 16))
@@ -107,6 +118,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_5.setFont(font)
         self.label_5.setObjectName("label_5")
+        self.gridLayout.addWidget(self.label_5, 4, 0, 1, 1)
 
         self.lineInstrsNum = QtWidgets.QLineEdit(self.centralwidget)
         self.lineInstrsNum.setGeometry(QtCore.QRect(180, 320, 151, 20))
@@ -115,6 +127,7 @@ class Ui_ConstructorWindow(object):
         self.lineInstrsNum.setFont(font)
         self.lineInstrsNum.setReadOnly(True)
         self.lineInstrsNum.setObjectName("lineInstrsNum")
+        self.gridLayout.addWidget(self.lineInstrsNum, 4, 1, 1, 2)
 
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
         self.label_6.setGeometry(QtCore.QRect(50, 350, 71, 16))
@@ -122,6 +135,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_6.setFont(font)
         self.label_6.setObjectName("label_6")
+        self.gridLayout.addWidget(self.label_6, 5, 0, 1, 1)
 
         self.listArgs = QtWidgets.QListWidget(self.centralwidget)
         self.listArgs.setGeometry(QtCore.QRect(180, 350, 151, 81))
@@ -129,6 +143,12 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.listArgs.setFont(font)
         self.listArgs.setObjectName("listArgs")
+        self.gridLayout.addWidget(self.listArgs, 5, 1, 2, 2)
+
+        self.label_12 = QtWidgets.QLabel(self.centralwidget)
+        self.label_12.setText("")
+        self.label_12.setObjectName("label_12")
+        self.gridLayout.addWidget(self.label_12, 6, 0, 1, 1)
 
         self.label_7 = QtWidgets.QLabel(self.centralwidget)
         self.label_7.setGeometry(QtCore.QRect(50, 440, 81, 16))
@@ -136,6 +156,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_7.setFont(font)
         self.label_7.setObjectName("label_7")
+        self.gridLayout.addWidget(self.label_7, 7, 0, 1, 1)
 
         self.lineRetValue = QtWidgets.QLineEdit(self.centralwidget)
         self.lineRetValue.setGeometry(QtCore.QRect(180, 440, 151, 20))
@@ -144,6 +165,7 @@ class Ui_ConstructorWindow(object):
         self.lineRetValue.setFont(font)
         self.lineRetValue.setReadOnly(True)
         self.lineRetValue.setObjectName("lineRetValue")
+        self.gridLayout.addWidget(self.lineRetValue, 7, 1, 1, 2)
 
         self.lineDistance = QtWidgets.QLineEdit(self.centralwidget)
         self.lineDistance.setGeometry(QtCore.QRect(180, 470, 151, 20))
@@ -153,6 +175,7 @@ class Ui_ConstructorWindow(object):
         self.lineDistance.setObjectName("lineDistance")
         self.onlyInt = QIntValidator()
         self.lineDistance.setValidator(self.onlyInt)
+        self.gridLayout.addWidget(self.lineDistance, 8, 1, 1, 2)
 
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
         self.label_8.setGeometry(QtCore.QRect(50, 470, 81, 16))
@@ -160,6 +183,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_8.setFont(font)
         self.label_8.setObjectName("label_8")
+        self.gridLayout.addWidget(self.label_8, 8, 0, 1, 1)
 
         self.btnFindNodes = QtWidgets.QPushButton(self.centralwidget)
         self.btnFindNodes.setGeometry(QtCore.QRect(130, 510, 131, 31))
@@ -167,6 +191,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.btnFindNodes.setFont(font)
         self.btnFindNodes.setObjectName("btnFindNodes")
+        self.gridLayout.addWidget(self.btnFindNodes, 9, 1, 1, 2)
 
         self.lineNodesNum = QtWidgets.QLineEdit(self.centralwidget)
         self.lineNodesNum.setGeometry(QtCore.QRect(220, 570, 111, 20))
@@ -175,6 +200,7 @@ class Ui_ConstructorWindow(object):
         self.lineNodesNum.setFont(font)
         self.lineNodesNum.setReadOnly(True)
         self.lineNodesNum.setObjectName("lineNodesNum")
+        self.gridLayout.addWidget(self.lineNodesNum, 10, 2, 1, 1)
 
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
         self.label_9.setGeometry(QtCore.QRect(50, 560, 161, 31))
@@ -182,6 +208,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_9.setFont(font)
         self.label_9.setObjectName("label_9")
+        self.gridLayout.addWidget(self.label_9, 10, 0, 1, 2)
 
         self.listFoundNodes = QtWidgets.QListWidget(self.centralwidget)
         self.listFoundNodes.setGeometry(QtCore.QRect(50, 610, 281, 191))
@@ -189,6 +216,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.listFoundNodes.setFont(font)
         self.listFoundNodes.setObjectName("listFoundNodes")
+        self.gridLayout.addWidget(self.listFoundNodes, 11, 0, 1, 3)
 
         self.btnDisplayDFG = QtWidgets.QPushButton(self.centralwidget)
         self.btnDisplayDFG.setGeometry(QtCore.QRect(120, 810, 131, 31)) # (700, 230, 131, 31))
@@ -197,6 +225,7 @@ class Ui_ConstructorWindow(object):
         self.btnDisplayDFG.setFont(font)
         self.btnDisplayDFG.setObjectName("btnDisplayDFG")
         self.btnDisplayDFG.setEnabled = False
+        self.gridLayout.addWidget(self.btnDisplayDFG, 12, 0, 1, 3)
         
         MainWindow.setCentralWidget(self.centralwidget)
         # toolbar = QToolBar("My main toolbar")
@@ -226,6 +255,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.btnClearlAdd.setFont(font)
         self.btnClearlAdd.setObjectName("btnClearlAdd")
+        self.gridLayout.addWidget(self.btnClearlAdd, 2, 2, 1, 1)
         self.btnClearlAdd.clicked.connect(self.unselectAdd)
 
         self.btnClearlDel = QtWidgets.QPushButton(self.centralwidget)
@@ -234,6 +264,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.btnClearlDel.setFont(font)
         self.btnClearlDel.setObjectName("btnClearlDel")
+        self.gridLayout.addWidget(self.btnClearlDel, 2, 3, 1, 1)
 
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
         self.tableWidget.setGeometry(QtCore.QRect(370, 290, 711, 551))
@@ -253,6 +284,7 @@ class Ui_ConstructorWindow(object):
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
+        self.gridLayout.addWidget(self.tableWidget, 3, 3, 10, 2)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -357,11 +389,13 @@ class Ui_ConstructorWindow(object):
         worker.signals.progress.connect(self.reportProgress)
         self.threadpool.start(worker)
     
-    def display_nodes(self, nodes):
+    def display_nodes(self, dfg):
+        self.dfg = dfg
         self.listFoundNodes.clear()
-        self.lineNodesNum.setText(str(len(nodes)))
-        for node in nodes:
-            self.listFoundNodes.addItem(str(node))
+        self.lineNodesNum.setText(str(len(self.dfg.map_path.keys())))
+        for node, value in self.dfg.map_path.items():
+            for val in value:
+                self.listFoundNodes.addItem(str(node))
     
     def show_dfg_path(self):
         if len(self.listFoundNodes.selectedItems()) == 1 and self.dfg is not None:
@@ -369,19 +403,18 @@ class Ui_ConstructorWindow(object):
             value = self.listFoundNodes.selectedItems()[0].text()
 
             index = self.listFoundNodes.selectedIndexes()[0].row()
-            number = 1
+            number = 0
             for i in range(0, index):
                 if self.listFoundNodes.item(i).text() == value:
                     number += 1
 
-            worker = Worker(get_path, self.dfg, distance, value, self.lineRetValue.text(), number)
-            worker.signals.result.connect(self.display_path)
-            worker.signals.progress.connect(self.reportProgress)
-            self.threadpool.start(worker)
+            nodes = self.dfg.map_path[value][number]
+            self.display_path(nodes)
     
     def display_path(self, nodes):
         x = 0
-        for key, node in nodes.items():
+        for node in nodes[::-1]:
+            key = node[0]
             print(str(key)+"  "+node.__str__())
             self.tableWidget.setRowCount(x+2)
             item = QtWidgets.QTableWidgetItem()
@@ -395,7 +428,7 @@ class Ui_ConstructorWindow(object):
             self.tableWidget.setItem(x, 0, item3)
 
             item4 = QtWidgets.QTableWidgetItem()
-            item4.setText(node[0].name)
+            item4.setText(node[1].name)
             self.tableWidget.setItem(x, 1, item4)
             item5 = QtWidgets.QTableWidgetItem()
             item5.setText(str(key))
@@ -407,7 +440,7 @@ class Ui_ConstructorWindow(object):
             item6.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(x+1, 0, item6)
             item7 = QtWidgets.QTableWidgetItem()
-            item7.setText(node[1].name)
+            item7.setText(node[2].name)
             item7.setTextAlignment(Qt.AlignCenter)
             self.tableWidget.setItem(x+1, 1, item7)
 
