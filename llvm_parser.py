@@ -1,8 +1,7 @@
 import copy
-from classes import Function, Operation, Label
+from classes import Function, Operation, Label, WorkerSignals
 from memory_management import memory_manag, rename_front_arg
 from addit_methods import *
-from worker import WorkerSignals
 
 def load_llvm(filename, progress):
     functions = []
@@ -75,7 +74,13 @@ def load_llvm(filename, progress):
                 word = line.split(',')
                 functions[-1].labels[-1].operations.append(Operation('getelementptr',
                                                                     value=get_name(data[0]),
-                                                                    args=[get_name(word[1].split(' ')[-1]), get_name(word[2].split(' ')[-1])]))
+                                                                    args=[get_name(word[1].split(' ')[-1]), get_name(word[2].split(' ')[-1])]
+                                                                    if len(word) == 3 else 
+                                                                    [get_name(word[1].split(' ')[-1]),
+                                                                     get_name(word[2].split(' ')[-1]),
+                                                                     get_name(word[3].split(' ')[-1])
+                                                                    ]
+                                                                    ))
             elif 'mul' in data or 'and' in data or 'add' in data or 'sub' in data or 'or' in data or 'shl' in data or 'lshr' in data or 'xor' in data:
                 functions[-1].labels[-1].operations.append(Operation(data[2],
                                                                     value=get_name(data[0]),
@@ -326,5 +331,5 @@ def parse_llvm(filename, progress):
     fs = unroll_llvm(fs, k_fs, progress)
     return fs
 
-# sss = WorkerSignals()
-# functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
+sss = WorkerSignals()
+functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)

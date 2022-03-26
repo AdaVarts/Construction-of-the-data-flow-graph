@@ -10,12 +10,11 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QIntValidator
-from PyQt5.QtWidgets import QListWidgetItem, QToolBar
+from PyQt5.QtCore import *
 
-from classes import Function
+from classes import Function, Worker
 from first import create_dfg, start_DFG
 from function_manag import merge_in_one
-from worker import *
 
 class Ui_ConstructorWindow(object):
     def setupUi(self, MainWindow, fs=[]):

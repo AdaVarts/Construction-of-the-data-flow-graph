@@ -31,6 +31,7 @@ class Label:
         self.name = name
         self.operations: typing.List[Operation] = []
 
+
 # DFG structure
 class Node:
     def __init__(self, name):
@@ -52,7 +53,7 @@ class Edge:
     def __str__(self) -> str:
         return self.name
 
-# node: name - variable+func.name; incom, outcom ::edge   +   edge:name - instr; tail, head ::node
+# node: name - variable+func.name; incom, outgo ::edge   +   edge:name - instr; tail, head ::node
 class DFG:
     def __init__(self):
         self.edges: typing.List[Edge] = []
@@ -74,3 +75,23 @@ class DFG:
             if edge.head is not None:
                 str+="head- "+edge.head.name+"\n"
         return str
+
+
+from PyQt5.QtCore import *
+
+class WorkerSignals(QObject):
+    finished = pyqtSignal()
+    result = pyqtSignal(object)
+    progress = pyqtSignal(str)
+
+class Worker(QRunnable):
+    def __init__(self, fn, *args):
+        super(Worker, self).__init__()
+        self.fn = fn
+        self.args = args
+        self.signals = WorkerSignals()
+
+    def run(self):
+        m = self.fn(*self.args, self.signals.progress)
+        self.signals.result.emit(m)
+        self.signals.finished.emit()

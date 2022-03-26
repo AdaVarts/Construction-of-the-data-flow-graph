@@ -1,11 +1,8 @@
 import copy
 from addit_methods import is_constant
 from classes import Function
-import logging
 
 from memory_management import rename_front_arg
-
-# LOGGER = logging.Logger('function unrollment')
 
 def merge_in_one(fs, name, addsf, delsf, progress):
     for f in fs:

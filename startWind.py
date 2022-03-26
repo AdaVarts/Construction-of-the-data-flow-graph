@@ -1,6 +1,5 @@
 import sys
-import PyQt5
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -8,7 +7,7 @@ from constructor import Ui_ConstructorWindow
 from llvm_parser import parse_llvm
 from startingWindowGUI import Ui_MainWindow
 from first import convert_C_into_llvm
-from worker import *
+from classes import Worker
 
 class MainWin(QtWidgets.QMainWindow):
     def __init__(self, parent=None):

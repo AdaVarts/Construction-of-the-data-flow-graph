@@ -12,8 +12,7 @@ from pycparser import parse_file#, preprocess_file
 import llvm_g 
 # import io
 # import ast
-from classes import DFG, Edge, Node
-from worker import WorkerSignals
+from classes import DFG, Edge, Node, WorkerSignals
 
 def translate_to_c(filename, printW):
     st = parse_file(filename, use_cpp=True, 
@@ -142,10 +141,10 @@ def convert_C_into_llvm(filename, printW):
 if __name__ == "__main__":
     sss = WorkerSignals()
     
-#    module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
-#    m = module.__str__()
+    m = module.__str__()
     # llvm_ir_parsed = binding.parse_assembly(str(module))
     # llvm_ir_parsed.verify()
 
@@ -155,24 +154,17 @@ if __name__ == "__main__":
     # f1.close()
     # print(m)
 
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
-    
-    # for f in functions:
-    #     if f.name == 'encrypt':
-    #         encrypt_f = copy.deepcopy(f)
-    #     if f.name == 'Sbox':
-    #         sbox_f = copy.deepcopy(f)
-    
-    func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
+    # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     
-    dfg = create_dfg(func, sss.progress)
+    # dfg = create_dfg(func, sss.progress)
     # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 5, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 7, f'encrypt_%state-63', sss.progress)
-    start_DFG(dfg, func, 9, f'encrypt_%state-63', sss.progress)
+    # start_DFG(dfg, func, 9, f'encrypt_%state-63', sss.progress)
     # path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
     # for i, n in path.items():
         # print(n)
