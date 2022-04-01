@@ -112,8 +112,9 @@ def compare_replace(text, text2):
 
 def remove_annotation(text):
 
-    UNNESS = ["__ext", "__dl", "bute__((__cd", "__att", "__res", "__unu",  "__nothrow__", "extern", "signed"]
+    UNNESS = ["__ext", "__dl", "bute__((__cd", "__att", "__res", "__unu",  "__nothrow__", "extern", "signed", "__inline__"]
     # UN_LINE = ["__non", "__inline__", "__attribute__((__format__"]
+    UN_LINE = ["#pragma", "__asm__ __volatile__", "__debugbreak", "__mingw_get_crt_info"]
 
     text_tmp = text.split('\n')
     for line in text_tmp:
@@ -133,7 +134,25 @@ def remove_annotation(text):
                     line = line2
                     j-=1
                 j+=1
-                
+    
+    for line in text_tmp:
+        line_spl = line.split(' ')
+        if any(iil in line for iil in UN_LINE):
+            i = text_tmp.index(line)
+            text_tmp.remove(line)
+            text_tmp.insert(i, "")
+            line = line2
+            if '{' in text_tmp[i+1].split(' '):
+                j = i+1
+                while '}' not in text_tmp[j].split(' '):
+                    text_tmp.pop(j)
+                    text_tmp.insert(j, "")
+                    j += 1
+                if '}' in text_tmp[j].split(' '):
+                    text_tmp.pop(j)
+                    text_tmp.insert(j, "")
+                    j += 1
+
 
     text2 = ""
     for line in text_tmp:

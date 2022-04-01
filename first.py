@@ -1,10 +1,10 @@
 # from msilib.schema import Error
 # import llvmlite
-import copy
-import typing
+# import copy
+# import typing
 from addit_methods import is_constant
-from function_manag import merge_in_one, merge_two_funcs
-from llvm_parser import parse_llvm
+# from function_manag import merge_in_one, merge_two_funcs
+# from llvm_parser import parse_llvm
 from pycparser import parse_file#, preprocess_file
 # import pyparsing as pp
 # from llvmlite import ir
@@ -20,9 +20,9 @@ def translate_to_c(filename, printW):
             cpp_args=['-E', r'-IC:/Users/Adalina/AppData/Local/Programs/Python/Python37/Lib/site-packages/pycparser/utils/fake_libc_include'],
             integer_types=False)
             # cpp_args=['-E'])
-    # f = open("F:\\STU\\FIIT\\BP\\ast_pr.txt", "w")
-    # st.show(buf = f)
-    # f.close()
+    f = open("F:\\STU\\FIIT\\BP\\ast_pr.txt", "w")
+    st.show(buf = f)
+    f.close()
 
     generator = llvm_g.llvm_Generator(printW)
     generator.visit(st)
@@ -59,7 +59,6 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
     if dfg_def == None:
         dfg_def = create_dfg(function, progress)
     
-
     k = 0
     try:
         ret_node = dfg_def.nodes[ret_value]
@@ -70,19 +69,9 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
     path = []
     nodes = []
     dfs(ret_node, k, int(distance), path, dfg_def.map_path)
-    # dfs(ret_node, k, int(distance), nodes)
+
     progress.emit(f"DFS has finished")
     return dfg_def
-    # return nodes
-
-# def dfs(node, k, distance, found_nodes):
-#     for edge in node.incoming:
-#         if k+1 == distance:
-#             if edge.tail not in found_nodes or is_constant(edge.tail.name):
-#                 found_nodes.append(edge.tail)
-#             continue
-#         if k >= distance: return
-#         dfs(edge.tail, k+1, distance, found_nodes)
 
 def dfs(node, k, distance, path, map_path):
     for edge in node.incoming:
@@ -142,17 +131,18 @@ if __name__ == "__main__":
     sss = WorkerSignals()
     
     module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
+    # module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
     m = module.__str__()
     # llvm_ir_parsed = binding.parse_assembly(str(module))
     # llvm_ir_parsed.verify()
 
-
     # f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", "w")
     # f1.write(m)
     # f1.close()
     # print(m)
+
 
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
@@ -160,6 +150,10 @@ if __name__ == "__main__":
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     
     # dfg = create_dfg(func, sss.progress)
+    # for key in dfg.nodes.keys():
+    #     if 'encrypt' not in key:
+    #         print(key)
+    # print("*******")
     # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 5, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)
