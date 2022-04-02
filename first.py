@@ -3,8 +3,8 @@
 # import copy
 # import typing
 from addit_methods import is_constant
-# from function_manag import merge_in_one, merge_two_funcs
-# from llvm_parser import parse_llvm
+from function_manag import merge_in_one, merge_two_funcs
+from llvm_parser import parse_llvm
 from pycparser import parse_file#, preprocess_file
 # import pyparsing as pp
 # from llvmlite import ir
@@ -130,11 +130,11 @@ def convert_C_into_llvm(filename, printW):
 if __name__ == "__main__":
     sss = WorkerSignals()
     
-    module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
-    # module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
+    # module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
-    m = module.__str__()
+    # m = module.__str__()
     # llvm_ir_parsed = binding.parse_assembly(str(module))
     # llvm_ir_parsed.verify()
 
@@ -145,6 +145,7 @@ if __name__ == "__main__":
 
 
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)

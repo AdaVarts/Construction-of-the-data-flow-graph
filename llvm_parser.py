@@ -72,10 +72,16 @@ def load_llvm(filename, progress):
                                                                     args=[get_name(data[3]), get_name(data[5]), get_name(data[6])]))
             elif 'getelementptr' in data:
                 word = line.split(',')
-                functions[-1].labels[-1].operations.append(Operation('getelementptr',
-                                                                    value=get_name(data[0]),
-                                                                    args=[get_name(word[1].split(' ')[-1]), get_name(word[2].split(' ')[-1])]
-                                                                    ))
+                if '[' in word[0]:
+                    functions[-1].labels[-1].operations.append(Operation('getelementptr',
+                                                                        value=get_name(data[0]),
+                                                                        args=[get_name(word[1].split(' ')[-1]), get_name(word[3].split(' ')[-1])]
+                                                                        ))
+                else:
+                    functions[-1].labels[-1].operations.append(Operation('getelementptr',
+                                                                        value=get_name(data[0]),
+                                                                        args=[get_name(word[1].split(' ')[-1]), get_name(word[2].split(' ')[-1])]
+                                                                        ))
             elif 'mul' in data or 'and' in data or 'add' in data or 'sub' in data or 'or' in data or 'shl' in data or 'lshr' in data or 'xor' in data:
                 functions[-1].labels[-1].operations.append(Operation(data[2],
                                                                     value=get_name(data[0]),
