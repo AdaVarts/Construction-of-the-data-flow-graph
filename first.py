@@ -68,7 +68,10 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
     progress.emit(f"starting DFS to length {distance}")
     path = []
     nodes = []
-    dfs(ret_node, k, int(distance), path, dfg_def.map_path)
+    try:
+        dfs(ret_node, k, int(distance), path, dfg_def.map_path)
+    except:
+        progress.emit(f"No node found")
 
     progress.emit(f"DFS has finished")
     return dfg_def

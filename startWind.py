@@ -37,6 +37,9 @@ class MainWin(QtWidgets.QMainWindow):
 
     def clicked_convert_into_llvm(self):
         self.ui.btnConvInLlvm.setEnabled(False)
+        self.ui.btnChooseC.setEnabled(False)
+        self.ui.btnChooseLlvm.setEnabled(False)
+        self.ui.btnBuildDFG.setEnabled(False)
         worker = Worker(convert_C_into_llvm, self.ui.linePathForC.text())
         worker.signals.result.connect(self.save)
         worker.signals.progress.connect(self.reportProgress)
@@ -44,17 +47,24 @@ class MainWin(QtWidgets.QMainWindow):
 
     def save(self, result):
         fileName, _ = QFileDialog.getSaveFileName(self, 'Save File', "","LLVM Files (*.ll)")
-        if result is not None:
+        if result is not None and fileName != '':
             with open(fileName, "w") as f1:
                 f1.write(result)
         self.ui.linePathForC.setText('')
+        self.ui.linePathForLlvm.setText('')
         self.ui.btnConvInLlvm.setEnabled(False)
+        self.ui.btnBuildDFG.setEnabled(False)
+        self.ui.btnChooseC.setEnabled(True)
+        self.ui.btnChooseLlvm.setEnabled(True)
 
     def reportProgress(self, s):
         self.ui.textPrint.append(s)
 
     
     def clicked_build_module(self):
+        self.ui.btnConvInLlvm.setEnabled(False)
+        self.ui.btnChooseC.setEnabled(False)
+        self.ui.btnChooseLlvm.setEnabled(False)
         self.ui.btnBuildDFG.setEnabled(False)
         worker = Worker(parse_llvm, self.ui.linePathForLlvm.text())
         worker.signals.result.connect(self.open_constructW)
