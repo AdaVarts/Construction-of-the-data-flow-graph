@@ -94,9 +94,12 @@ def create_dfg(function, progress):
     progress.emit("Data Flow Graph: starting to build")
     for op in function.labels[0].operations:
         try:
-            if op.name == 'store':
-                save_one_tail(0, dfg, op)
-            elif op.name == 'br' or op.name == 'ret':
+            # if op.name == 'store':
+            #     if len(op.args) == 1:
+            #         save_one_tail(0, dfg, op)
+            #     else:
+
+            if op.name == 'br' or op.name == 'ret':
                 continue
             # elif op.name == 'ret':
             #     dfg, node1 = save_node(dfg, op.args[0])
@@ -131,28 +134,31 @@ if __name__ == "__main__":
     sss = WorkerSignals()
     
     # module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
-    module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
+    # module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\blowfish.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
-    # m = module.__str__()
+    m = module.__str__()
     # llvm_ir_parsed = binding.parse_assembly(str(module))
     # llvm_ir_parsed.verify()
 
-    # f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", "w")
-    # f1.write(m)
-    # f1.close()
-    # print(m)
+    f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", "w")
+    f1.write(m)
+    f1.close()
+    print(m)
 
 
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
+    # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     
     # dfg = create_dfg(func, sss.progress)
     # for key in dfg.nodes.keys():
-    #     if 'encrypt' not in key:
+        # if 'encrypt' not in key:
     #         print(key)
     # print("*******")
     # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)

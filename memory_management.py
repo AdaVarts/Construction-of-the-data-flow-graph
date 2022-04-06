@@ -53,13 +53,19 @@ def memory_manag(fs, k_fs):
         for l in f.labels:
             for op in l.operations[::-1]:
                 if op.name == 'store':
-                    if (is_used_backw(f, op.args[0], l.operations.index(op)-1, f.labels.index(l)) and
-                       is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l)) is False):
-                        rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
+                    if is_overwritten(f, op.value, l.operations.index(op)+1, f.labels.index(l)):
+                        # rename_backw(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
-                    elif is_overwritten(f, op.value, l.operations.index(op)+1, f.labels.index(l)):
-                        # rename_backw(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
+
+    for f in fs:
+        for l in f.labels:
+            for op in l.operations[::-1]:
+                if op.name == 'store':
+                    if (not is_used_front(f, op.args[0], l.operations.index(op)+1, f.labels.index(l)) and
+                       is_used_backw(f, op.args[0], l.operations.index(op)-1, f.labels.index(l)) and
+                       is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l)) is False):
+                        rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
 
@@ -68,11 +74,13 @@ def memory_manag(fs, k_fs):
         for l in f.labels:
             for op in l.operations[::-1]:
                 val = is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l))
-                if op.name == 'store' and val is not False:
-                    op.value = val
+                if op.name in ('memcpy', 'memmove', 'store') and val:
+                    op.args.append(op.value)
+                    # op.value = val
                     # another option to store into got element and directly into array
-                    # l.operations.insert(l.operations.index(op)+1, Operation("store", val, op.args))
-
+                    l.operations.insert(l.operations.index(op)+1, Operation("store", val, [op.value]))
+                # elif op.name in ('memcpy', 'memmove') and val:
+                #     l.operations.insert(l.operations.index(op)+1, Operation("store", val, [op.value]))
     return fs
 
 def is_used_backw(f, val, index_op, index_l):

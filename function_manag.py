@@ -4,6 +4,19 @@ from classes import Function
 
 from memory_management import rename_front_arg
 
+def get_ret_values(function, progress):
+    res = []
+    for param in function.params:
+        try:
+            ind = function.ssa_map_var[function.name+'_'+param+'.1'] - 1
+            var = f'{function.name}_{param}.1-{ind}'
+            res.append(var)
+        except:
+            continue
+    if len(res) == 0:
+        progress.emit(f"Error: no changed value to return was found")
+    return res
+
 def merge_in_one(fs, name, addsf, delsf, progress):
     for f in fs:
         if f.name == name:
@@ -29,6 +42,9 @@ def merge_in_one(fs, name, addsf, delsf, progress):
         progress.emit(f"deleting function {del_function.name} completed")
 
     progress.emit(f"merging completed")
+    for param in start_f.params[::-1]:
+        if param == '':
+            start_f.params.pop(start_f.params.index(param))
     return start_f
 
 def delete_f(dest: Function, source: Function, progress):

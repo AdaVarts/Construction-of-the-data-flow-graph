@@ -14,7 +14,7 @@ from PyQt5.QtCore import *
 
 from classes import Function, Worker
 from first import create_dfg, start_DFG
-from function_manag import merge_in_one
+from function_manag import get_ret_values, merge_in_one
 
 class Ui_ConstructorWindow(object):
     def setupUi(self, MainWindow, fs=[]):
@@ -157,14 +157,26 @@ class Ui_ConstructorWindow(object):
         self.label_7.setObjectName("label_7")
         self.gridLayout.addWidget(self.label_7, 7, 0, 1, 1)
 
-        self.lineRetValue = QtWidgets.QLineEdit(self.centralwidget)
-        self.lineRetValue.setGeometry(QtCore.QRect(180, 440, 151, 20))
+        self.label_21 = QtWidgets.QLabel(self.centralwidget)
+        # self.label_21.setGeometry(QtCore.QRect(50, 10, 131, 16))
+        self.label_21.setObjectName("label_21")
+        self.gridLayout.addWidget(self.label_21, 8, 0, 1, 1)
+
+        self.listReturnValues = QtWidgets.QListWidget(self.centralwidget)
+        # self.listReturnValues.setGeometry(QtCore.QRect(180, 350, 151, 81))
         font = QtGui.QFont()
         font.setPointSize(10)
-        self.lineRetValue.setFont(font)
-        self.lineRetValue.setReadOnly(True)
-        self.lineRetValue.setObjectName("lineRetValue")
-        self.gridLayout.addWidget(self.lineRetValue, 7, 1, 1, 2)
+        self.listReturnValues.setFont(font)
+        self.listReturnValues.setObjectName("listReturnValues")
+        self.gridLayout.addWidget(self.listReturnValues, 7, 1, 2, 2)
+        # self.lineRetValue = QtWidgets.QLineEdit(self.centralwidget)
+        # self.lineRetValue.setGeometry(QtCore.QRect(180, 440, 151, 20))
+        # font = QtGui.QFont()
+        # font.setPointSize(10)
+        # self.lineRetValue.setFont(font)
+        # self.lineRetValue.setReadOnly(True)
+        # self.lineRetValue.setObjectName("lineRetValue")
+        # self.gridLayout.addWidget(self.lineRetValue, 7, 1, 1, 2)
 
         self.lineDistance = QtWidgets.QLineEdit(self.centralwidget)
         self.lineDistance.setGeometry(QtCore.QRect(180, 470, 151, 20))
@@ -174,7 +186,7 @@ class Ui_ConstructorWindow(object):
         self.lineDistance.setObjectName("lineDistance")
         self.onlyInt = QIntValidator()
         self.lineDistance.setValidator(self.onlyInt)
-        self.gridLayout.addWidget(self.lineDistance, 8, 1, 1, 2)
+        self.gridLayout.addWidget(self.lineDistance, 9, 1, 1, 2)
 
         self.label_8 = QtWidgets.QLabel(self.centralwidget)
         self.label_8.setGeometry(QtCore.QRect(50, 470, 81, 16))
@@ -182,7 +194,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_8.setFont(font)
         self.label_8.setObjectName("label_8")
-        self.gridLayout.addWidget(self.label_8, 8, 0, 1, 1)
+        self.gridLayout.addWidget(self.label_8, 9, 0, 1, 1)
 
         self.btnFindNodes = QtWidgets.QPushButton(self.centralwidget)
         self.btnFindNodes.setGeometry(QtCore.QRect(130, 510, 131, 31))
@@ -190,7 +202,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.btnFindNodes.setFont(font)
         self.btnFindNodes.setObjectName("btnFindNodes")
-        self.gridLayout.addWidget(self.btnFindNodes, 9, 1, 1, 2)
+        self.gridLayout.addWidget(self.btnFindNodes, 10, 1, 1, 2)
 
         self.lineNodesNum = QtWidgets.QLineEdit(self.centralwidget)
         self.lineNodesNum.setGeometry(QtCore.QRect(220, 570, 111, 20))
@@ -199,7 +211,7 @@ class Ui_ConstructorWindow(object):
         self.lineNodesNum.setFont(font)
         self.lineNodesNum.setReadOnly(True)
         self.lineNodesNum.setObjectName("lineNodesNum")
-        self.gridLayout.addWidget(self.lineNodesNum, 10, 2, 1, 1)
+        self.gridLayout.addWidget(self.lineNodesNum, 11, 2, 1, 1)
 
         self.label_9 = QtWidgets.QLabel(self.centralwidget)
         self.label_9.setGeometry(QtCore.QRect(50, 560, 161, 31))
@@ -207,7 +219,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.label_9.setFont(font)
         self.label_9.setObjectName("label_9")
-        self.gridLayout.addWidget(self.label_9, 10, 0, 1, 2)
+        self.gridLayout.addWidget(self.label_9, 11, 0, 1, 2)
 
         self.listFoundNodes = QtWidgets.QListWidget(self.centralwidget)
         self.listFoundNodes.setGeometry(QtCore.QRect(50, 610, 281, 191))
@@ -215,7 +227,7 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.listFoundNodes.setFont(font)
         self.listFoundNodes.setObjectName("listFoundNodes")
-        self.gridLayout.addWidget(self.listFoundNodes, 11, 0, 1, 3)
+        self.gridLayout.addWidget(self.listFoundNodes, 12, 0, 1, 3)
 
         self.btnDisplayDFG = QtWidgets.QPushButton(self.centralwidget)
         self.btnDisplayDFG.setGeometry(QtCore.QRect(120, 810, 131, 31)) # (700, 230, 131, 31))
@@ -224,7 +236,7 @@ class Ui_ConstructorWindow(object):
         self.btnDisplayDFG.setFont(font)
         self.btnDisplayDFG.setObjectName("btnDisplayDFG")
         self.btnDisplayDFG.setEnabled = False
-        self.gridLayout.addWidget(self.btnDisplayDFG, 12, 0, 1, 3)
+        self.gridLayout.addWidget(self.btnDisplayDFG, 13, 0, 1, 3)
         
         MainWindow.setCentralWidget(self.centralwidget)
         # toolbar = QToolBar("My main toolbar")
@@ -283,7 +295,7 @@ class Ui_ConstructorWindow(object):
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setEditTriggers(QtWidgets.QTableWidget.NoEditTriggers)
-        self.gridLayout.addWidget(self.tableWidget, 3, 3, 10, 2)
+        self.gridLayout.addWidget(self.tableWidget, 3, 3, 11, 2)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -298,7 +310,7 @@ class Ui_ConstructorWindow(object):
         self.listFunctDel.setSelectionMode(
             QtWidgets.QAbstractItemView.ExtendedSelection
         )
-        
+
         self.btnClearlDel.clicked.connect(self.unselectDel)
         self.btnGenerate.clicked.connect(self.generate)
         self.btnFindNodes.clicked.connect(self.find_nodes)
@@ -321,6 +333,7 @@ class Ui_ConstructorWindow(object):
         self.btnFindNodes.setText(_translate("MainWindow", "Find nodes"))
         self.label_9.setText(_translate("MainWindow", "Nodes on entered distance\n"
 "from return value"))
+        self.label_21.setText(_translate("MainWindow", "            \n\n"))
         self.btnDisplayDFG.setText(_translate("MainWindow", "Display DFG"))
         self.btnClearlDel.setText(_translate("MainWindow", "Clear"))
         self.btnClearlAdd.setText(_translate("MainWindow", "Clear"))
@@ -347,7 +360,8 @@ class Ui_ConstructorWindow(object):
         self.lineInstrsNum.setText('')
         self.lineDistance.setText('')
         self.listArgs.clear()
-        self.lineRetValue.setText('')
+        self.listReturnValues.clear()
+        # self.lineRetValue.setText('')
         self.listFoundNodes.clear()
         self.lineNodesNum.setText('')
 
@@ -364,12 +378,27 @@ class Ui_ConstructorWindow(object):
         self.textPrint.append(progress)
     
     def set_all(self, result: Function):
+        if len(result.labels) > 1:
+            self.textPrint.append(f"Error: chosen function {result.name} has more than 1 label")
+            self.textPrint.append(f"Choose another function")
+            return
         self.function = result
         self.textPrint.append("")
         self.lineFuncName.setText(result.name)
         self.lineInstrsNum.setText(str(len(result.labels[0].operations)))
         self.listArgs.addItems(result.params)
-        self.lineRetValue.setText(result.labels[0].operations[-1].args[0])
+        if result.labels[0].operations[-1].args[0] == '':
+            # self.listReturnValues.addItems(result.params)
+            worker = Worker(get_ret_values, result)
+            worker.signals.result.connect(self.set_return_val)
+            worker.signals.progress.connect(self.reportProgress)
+            self.threadpool.start(worker)
+        else:
+            self.listReturnValues.addItem(result.labels[0].operations[-1].args[0])
+        # self.lineRetValue.setText(result.labels[0].operations[-1].args[0])
+
+    def set_return_val(self, ret_values):
+        self.listReturnValues.addItems(ret_values)
 
     def find_nodes(self):
         distance = self.lineDistance.text()
@@ -383,7 +412,9 @@ class Ui_ConstructorWindow(object):
         self.dfg = dfg
 
         distance = self.lineDistance.text()
-        worker = Worker(start_DFG, self.dfg, self.function, distance, self.lineRetValue.text())
+        ret_val = self.listReturnValues.selectedItems()[0].text() if len(self.listReturnValues.selectedItems()) == 1 \
+            else self.listReturnValues.item(0).text()
+        worker = Worker(start_DFG, self.dfg, self.function, distance, ret_val)
         worker.signals.result.connect(self.display_nodes)
         worker.signals.progress.connect(self.reportProgress)
         self.threadpool.start(worker)

@@ -4,10 +4,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1130, 870)
+        MainWindow.resize(1175, 417)
         MainWindow.setMaximumSize(QtCore.QSize(1500, 870))
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
+        self.gridLayout.setObjectName("gridLayout")
         
         self.btnChooseC = QtWidgets.QPushButton(self.centralwidget)
         self.btnChooseC.setGeometry(QtCore.QRect(650, 40, 91, 31))
@@ -15,6 +17,7 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.btnChooseC.setFont(font)
         self.btnChooseC.setObjectName("btnChooseC")
+        self.gridLayout.addWidget(self.btnChooseC, 1, 2, 1, 1)
 
         self.linePathForC = QtWidgets.QLineEdit(self.centralwidget)
         self.linePathForC.setGeometry(QtCore.QRect(20, 40, 611, 31))
@@ -23,6 +26,7 @@ class Ui_MainWindow(object):
         self.linePathForC.setFont(font)
         self.linePathForC.setReadOnly(True)
         self.linePathForC.setObjectName("linePathForC")
+        self.gridLayout.addWidget(self.linePathForC, 0, 1, 1, 2)
 
         self.btnBuildDFG = QtWidgets.QPushButton(self.centralwidget)
         self.btnBuildDFG.setEnabled(False)
@@ -31,6 +35,7 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.btnBuildDFG.setFont(font)
         self.btnBuildDFG.setObjectName("btnBuildDFG")
+        self.gridLayout.addWidget(self.btnBuildDFG, 4, 1, 1, 1)
 
         self.btnConvInLlvm = QtWidgets.QPushButton(self.centralwidget)
         self.btnConvInLlvm.setEnabled(False)
@@ -39,6 +44,7 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.btnConvInLlvm.setFont(font)
         self.btnConvInLlvm.setObjectName("btnConvInLlvm")
+        self.gridLayout.addWidget(self.btnConvInLlvm, 1, 1, 1, 1)
 
         self.linePathForLlvm = QtWidgets.QLineEdit(self.centralwidget)
         self.linePathForLlvm.setGeometry(QtCore.QRect(20, 200, 611, 31))
@@ -47,6 +53,7 @@ class Ui_MainWindow(object):
         self.linePathForLlvm.setFont(font)
         self.linePathForLlvm.setReadOnly(True)
         self.linePathForLlvm.setObjectName("linePathForLlvm")
+        self.gridLayout.addWidget(self.linePathForLlvm, 3, 1, 1, 2)
         
         self.btnChooseLlvm = QtWidgets.QPushButton(self.centralwidget)
         self.btnChooseLlvm.setGeometry(QtCore.QRect(650, 200, 91, 31))
@@ -54,29 +61,41 @@ class Ui_MainWindow(object):
         font.setPointSize(10)
         self.btnChooseLlvm.setFont(font)
         self.btnChooseLlvm.setObjectName("btnChooseLlvm")
+        self.gridLayout.addWidget(self.btnChooseLlvm, 4, 2, 1, 1)
 
         self.textPrint = QtWidgets.QTextEdit(self.centralwidget)
         self.textPrint.setEnabled(True)
         self.textPrint.setGeometry(QtCore.QRect(760, 40, 350, 211))
-        self.textPrint.setMaximumSize(QtCore.QSize(441, 211))
+        self.textPrint.setMaximumSize(QtCore.QSize(1500, 1500))
         self.textPrint.setReadOnly(True)
         font = QtGui.QFont()
         font.setPointSize(10)
         self.textPrint.setFont(font)
         self.textPrint.setObjectName("textPrint")
+        self.gridLayout.addWidget(self.textPrint, 6, 1, 1, 2)
 
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(30, 10, 91, 16))
+        self.label.setMinimumSize(QtCore.QSize(140, 0))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.label.setFont(font)
         self.label.setObjectName("label")
+        self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(30, 170, 181, 16))
+        self.label_2.setMinimumSize(QtCore.QSize(140, 0))
+        self.label_2.setMaximumSize(QtCore.QSize(160, 16777215))
         font = QtGui.QFont()
         font.setPointSize(11)
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
+        self.gridLayout.addWidget(self.label_2, 3, 0, 1, 1)
+
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setObjectName("label_3")
+        self.gridLayout.addWidget(self.label_3, 5, 1, 1, 2)
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.label_4.setObjectName("label_4")
+        self.gridLayout.addWidget(self.label_4, 2, 1, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
 
         self.retranslateUi(MainWindow)
@@ -90,7 +109,10 @@ class Ui_MainWindow(object):
         self.btnConvInLlvm.setText(_translate("MainWindow", "Convert into LLVM IR"))
         self.btnChooseLlvm.setText(_translate("MainWindow", "Choose file"))
         self.label.setText(_translate("MainWindow", "Load file in C"))
-        self.label_2.setText(_translate("MainWindow", "Load file in LLVM format"))
+        self.label_2.setText(_translate("MainWindow", "Load file in LLVM"))
+        self.label_3.setText(_translate("MainWindow", "                                                             \n"
+"               "))
+        self.label_4.setText(_translate("MainWindow", "      "))
 
 
 if __name__ == "__main__":
