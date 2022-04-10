@@ -79,8 +79,6 @@ def memory_manag(fs, k_fs):
                     # op.value = val
                     # another option to store into got element and directly into array
                     l.operations.insert(l.operations.index(op)+1, Operation("store", val, [op.value]))
-                # elif op.name in ('memcpy', 'memmove') and val:
-                #     l.operations.insert(l.operations.index(op)+1, Operation("store", val, [op.value]))
     return fs
 
 def is_used_backw(f, val, index_op, index_l):

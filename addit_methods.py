@@ -44,22 +44,36 @@ def reduce_to_value(name):
     return b.replace('%', '')
 
 def set_new_name(name, map):
-    map[get_the_real_name(name)] +=1
-    if map[get_the_real_name(name)] == 1:
+    real_name = get_the_real_name(name)
+    map[real_name] +=1
+    if map[real_name] == 1:
         return name
     else:
-        return get_the_real_name(name)+'-'+str(map[get_the_real_name(name)]-1)
+        return real_name+'-'+str(map[real_name]-1)
 
 def get_prev_name(name, map):
-    if map[get_the_real_name(name)]-1 == 0:
-        return get_the_real_name(name)
-    return get_the_real_name(name)+'-'+str(map[get_the_real_name(name)]-1)
+    real_name = get_the_real_name(name)
+    if real_name not in map:
+        return real_name
+    if map[real_name]-1 == 0:
+        return real_name
+    return real_name+'-'+str(map[real_name]-1)
 
 def get_current_name(name, function):
-    if function.ssa_map_lbl[get_the_real_name(name)] == 0:
+    real_name = get_the_real_name(name)
+    if function.ssa_map_lbl[real_name] == 0:
         return name
     else:
-        return get_the_real_name(name)+'-'+str(function.ssa_map_lbl[get_the_real_name(name)])
+        return real_name+'-'+str(function.ssa_map_lbl[real_name])
+
+# def get_current_name_var(name, function):
+#     real_name = get_the_real_name(name)
+#     if real_name not in function.ssa_map_var:
+#         return name
+#     if function.ssa_map_var[real_name] == 0:
+#         return name
+#     else:
+#         return real_name+'-'+str(function.ssa_map_var[real_name])
 
 def get_the_real_name(name):
     return name.split('-')[0]

@@ -46,10 +46,11 @@ class MainWin(QtWidgets.QMainWindow):
         self.threadpool.start(worker)
 
     def save(self, result):
-        fileName, _ = QFileDialog.getSaveFileName(self, 'Save File', "","LLVM Files (*.ll)")
-        if result is not None and fileName != '':
-            with open(fileName, "w") as f1:
-                f1.write(result)
+        if result:
+            fileName, _ = QFileDialog.getSaveFileName(self, 'Save File', "","LLVM Files (*.ll)")
+            if result is not None and fileName != '':
+                with open(fileName, "w") as f1:
+                    f1.write(result)
         self.ui.linePathForC.setText('')
         self.ui.linePathForLlvm.setText('')
         self.ui.btnConvInLlvm.setEnabled(False)

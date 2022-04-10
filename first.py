@@ -129,41 +129,45 @@ def create_dfg(function, progress):
 
 
 def convert_C_into_llvm(filename, printW):
-    module = translate_to_c(filename, printW)
-    m = module.__str__()
-    return m
+    try:
+        module = translate_to_c(filename, printW)
+        m = module.__str__()
+        return m
+    except:
+        printW.emit("Error: converting was not successful")
+        return None
 
 if __name__ == "__main__":
     sss = WorkerSignals()
     
     # module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
     # module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
-    module = translate_to_c("F:\\STU\\FIIT\\BP\\blowfish.c", sss.progress)
+    # module = translate_to_c("F:\\STU\\FIIT\\BP\\blowfish.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
-    m = module.__str__()
+    # m = module.__str__()
     # llvm_ir_parsed = binding.parse_assembly(str(module))
     # llvm_ir_parsed.verify()
 
-    f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", "w")
-    f1.write(m)
-    f1.close()
-    print(m)
+    # f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_2.ll", "w")
+    # f1.write(m)
+    # f1.close()
+    # print(m)
 
 
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
+    func = merge_in_one(functions, 'encrypt', [], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     
-    # dfg = create_dfg(func, sss.progress)
-    # for key in dfg.nodes.keys():
-        # if 'encrypt' not in key:
-    #         print(key)
-    # print("*******")
+    dfg = create_dfg(func, sss.progress)
+    for key in dfg.nodes.keys():
+        if 'encrypt' not in key:
+            print(key)
+    print("*******")
     # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 5, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)

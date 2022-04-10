@@ -384,10 +384,14 @@ def unroll_llvm(fs, known_funcs, progress):
         for l in f.labels:
             for op in l.operations:
                 if op.name != 'br' and op.value != '':
-                    var = get_prev_name(op.value, f.ssa_map_var)
+                    if op.args is not None:
+                        for i in range(0, len(op.args)):
+                            if not is_constant(op.args[i]):
+                                op.args[i] = get_prev_name(op.args[i], f.ssa_map_var)
+                    # var = get_prev_name(op.value, f.ssa_map_var)
                     op.value = set_new_name(op.value, f.ssa_map_var)
-                    if op.value != var:
-                        rename_front_arg(f, var, op.value, l.operations.index(op)+1, f.labels.index(l))
+                    # if op.value != var:
+                    #     rename_front_arg(f, var, op.value, l.operations.index(op)+1, f.labels.index(l))
     progress.emit("end variable identification")
     print("*******************************************************************")
     
