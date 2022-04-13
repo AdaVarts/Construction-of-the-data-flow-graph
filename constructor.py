@@ -459,6 +459,9 @@ class Ui_ConstructorWindow(object):
         self.threadpool.start(worker)
     
     def display_nodes(self, dfg):
+        if dfg == []:
+            self.textPrint.append(f"Error: path was not found")
+            return
         self.dfg = dfg
         self.listFoundNodes.clear()
         self.lineNodesNum.setText(str(len(self.dfg.map_path.keys())))
