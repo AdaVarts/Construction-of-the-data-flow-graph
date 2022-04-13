@@ -8,7 +8,10 @@ def get_ret_values(function, progress):
     res = []
     for param in function.params:
         try:
-            ind = function.ssa_map_var[function.name+'_'+param+'.1'] - 1
+            try:
+                ind = function.ssa_map_var[function.name+'_'+param+'.1'] - 1
+            except:
+                ind = function.ssa_map_var[function.name+'_'+param] - 1
             var = f'{function.name}_{param}.1-{ind}'
             res.append(var)
         except:

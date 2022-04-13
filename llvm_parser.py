@@ -3,7 +3,7 @@ from classes import Function, Operation, Label, WorkerSignals
 from memory_management import memory_manag, rename_front_arg
 from addit_methods import *
 # import sys
-# sys.setrecursionlimit(2500)
+# sys.setrecursionlimit(3000)
 
 def load_llvm(filename, progress):
     functions = []
@@ -88,11 +88,13 @@ def load_llvm(filename, progress):
                                                                     args=[get_name(data[3]), get_name(data[5]), get_name(data[6])]))
             elif 'getelementptr' in data:
                 word = line.split(',')
-                if '[' in word[0] or 'struct' in word[0]:
-                    functions[-1].labels[-1].operations.append(Operation('getelementptr',
-                                                                        value=get_name(data[0]),
-                                                                        args=[get_name(word[1].split(' ')[-1]), get_name(word[3].split(' ')[-1])]
-                                                                        ))
+                if '[' in word[0] or ('struct' in word[0] and word[2].split(' ')[-1] == '0'):
+                        functions[-1].labels[-1].operations.append(Operation('getelementptr',
+                                                                            value=get_name(data[0]),
+                                                                            args=[get_name(word[1].split(' ')[-1]), get_name(word[3].split(' ')[-1])]
+                                                                            ))
+                # if len(word) == 4:
+                #     functions[-1].labels[-1].operations[-1].args.append(get_name(word[3].split(' ')[-1]))
                 else:
                     functions[-1].labels[-1].operations.append(Operation('getelementptr',
                                                                         value=get_name(data[0]),
@@ -390,6 +392,8 @@ def unroll_llvm(fs, known_funcs, progress):
                                 op.args[i] = get_prev_name(op.args[i], f.ssa_map_var)
                     # var = get_prev_name(op.value, f.ssa_map_var)
                     op.value = set_new_name(op.value, f.ssa_map_var)
+                elif op.name == 'ret' and len(op.args) > 0 and op.args[0] != '':
+                    op.args[0] = get_prev_name(op.args[0], f.ssa_map_var)
                     # if op.value != var:
                     #     rename_front_arg(f, var, op.value, l.operations.index(op)+1, f.labels.index(l))
     progress.emit("end variable identification")
@@ -417,6 +421,6 @@ def parse_llvm(filename, progress):
 
 if __name__ == "__main__":
     sss = WorkerSignals()
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna_1.ll", sss.progress)

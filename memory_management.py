@@ -69,17 +69,36 @@ def memory_manag(fs, k_fs):
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
 
-    # to replace storing the element of array in got element   to   storing directly into array
+    with open("F:\\STU\\FIIT\\BP\\output_mem_man.txt", "w") as f:
+        for func in fs:
+            f.write(func.name)
+            f.write('\n')
+            f.write(str(func.params))
+            f.write('\n')
+            for label in func.labels:
+                f.write('   '+label.name+'\n')
+                for op in label.operations:
+                    f.write('      '+op.name+': '+op.value+'\n')
+                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+
+    # to change storing the element of array in got element   to   storing into array
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
                 val = is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l))
                 if op.name in ('memcpy', 'memmove', 'store') and val:
                     op.args.append(op.value)
-                    # op.value = val
-                    # another option to store into got element and directly into array
                     l.operations.insert(l.operations.index(op)+1, Operation("store", val, [op.value]))
+                    f = store_into_arr_check(f, l, l.operations[l.operations.index(op)+1])
     return fs
+
+def store_into_arr_check(f, l, op):
+    new_val = is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l))
+    if op.name in ('memcpy', 'memmove', 'store') and new_val:
+        op.args.append(op.value)
+        l.operations.insert(l.operations.index(op)+1, Operation("store", new_val, [op.value]))
+        f = store_into_arr_check(f, l, l.operations[l.operations.index(op)+1])
+    return f
 
 def is_used_backw(f, val, index_op, index_l):
     for j in range(index_op, -1, -1):
@@ -108,12 +127,12 @@ def is_overwritten(f, val, index_op, index_l):
             return True
         elif f.labels[index_l].operations[j].args is not None and val in f.labels[index_l].operations[j].args:
             return False
-    for i in range(index_l+1, len(f.labels)):
-        for j in range(0, len(f.labels[i].operations)):
-            if f.labels[i].operations[j].value == val:
-                return True
-            elif f.labels[i].operations[j].args is not None and val in f.labels[i].operations[j].args:
-                return False
+    # for i in range(index_l+1, len(f.labels)):
+    #     for j in range(0, len(f.labels[i].operations)):
+    #         if f.labels[i].operations[j].value == val:
+    #             return True
+    #         elif f.labels[i].operations[j].args is not None and val in f.labels[i].operations[j].args:
+    #             return False
     return False
 
 def is_used_front(f, val, index_op, index_l):

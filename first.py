@@ -2,8 +2,9 @@
 # import llvmlite
 # import copy
 # import typing
+import time
 from addit_methods import is_constant
-from function_manag import merge_in_one, merge_two_funcs
+from function_manag import get_ret_values, merge_in_one, merge_two_funcs
 from llvm_parser import parse_llvm
 from pycparser import parse_file#, preprocess_file
 # import pyparsing as pp
@@ -55,7 +56,14 @@ def save_two_tails(dfg, op):
     dfg = save_one_tail(1, dfg, op)
     return dfg
 
+def save_three_tails(dfg, op):
+    dfg = save_one_tail(0, dfg, op)
+    dfg = save_one_tail(1, dfg, op)
+    dfg = save_one_tail(2, dfg, op)
+    return dfg
+
 def start_DFG(dfg_def, function, distance, ret_value, progress):
+    start_time=time.time()
     if dfg_def == None:
         dfg_def = create_dfg(function, progress)
     
@@ -73,7 +81,9 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
     except:
         progress.emit(f"No node found")
 
+    delay = time.time()-start_time
     progress.emit(f"DFS has finished")
+    progress.emit(f"Delay: {delay}")
     return dfg_def
 
 def dfs(node, k, distance, path, map_path):
@@ -119,6 +129,8 @@ def create_dfg(function, progress):
                 dfg.edges.append(edge)
             elif op.args is not None and len(op.args) == 2:
                 save_two_tails(dfg, op)
+            elif op.args is not None and len(op.args) == 3:
+                save_three_tails(dfg, op)
             else:
                 save_one_tail(0, dfg, op)
         except Exception as e:
@@ -157,16 +169,21 @@ if __name__ == "__main__":
 
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    func = merge_in_one(functions, 'encrypt', [], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
+    try:
+        functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", sss.progress)
+    except:
+        print("some error")
+    # func = merge_in_one(functions, 'encrypt', [], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
+    func = merge_in_one(functions, 'blowfish_key_setup', [], [], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
-    
-    dfg = create_dfg(func, sss.progress)
-    for key in dfg.nodes.keys():
-        if 'encrypt' not in key:
-            print(key)
+    get_ret_values(func, sss.progress)
+    # dfg = create_dfg(func, sss.progress)
+    # for key in dfg.nodes.keys():
+    #     if 'encrypt' not in key:
+    #         print(key)
     print("*******")
     # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 5, f'encrypt_%state-63', sss.progress)
