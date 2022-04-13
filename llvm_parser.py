@@ -124,6 +124,13 @@ def load_llvm(filename, progress):
                                                                     value=get_name(data[0]),
                                                                     args=[[get_name(line.split(',')[0].split(' ')[-1]), get_name(line.split(',')[1])],
                                                                         [get_name(line.split(',')[2]), get_name(line.split(',')[3])]]))
+            elif 'switch' in data:
+                switch_op = Operation('switch', value=get_name(data[2]), args=[get_name(data[4])])
+                switch_args = {}
+                for i in range(0, int((len(data)-5)/4)):
+                    switch_args[get_name(data[i*4+6])] = get_name(data[i*4+8])
+                switch_op.args.append(switch_args)
+                functions[-1].labels[-1].operations.append(switch_op)
 
     progress.emit("end loading")
     progress.emit("start customising")
@@ -160,6 +167,37 @@ def load_llvm(filename, progress):
     
     return functions, known_funcs
 
+
+def find_val(functions, op):
+    val = op.value
+    args = copy.deepcopy(op.args[1])
+    try:
+        for label in functions[-1].labels[::-1]:
+            for oper in label.operations[::-1]:
+                if val == oper.value:
+                    if oper.name == 'load' or oper.name == 'store':
+                        val = oper.args[0]
+                    elif oper.name == 'add':
+                        for i in args.keys():
+                            args[i] -= int(oper.args[1])
+                        val = oper.args[0]
+                    elif oper.name == 'sub':
+                        for i in args.keys():
+                            args[i] += int(oper.args[1])
+                        val = oper.args[0]
+                    elif oper.name == 'mul':
+                        for i in args.keys():
+                            args[i] /= int(oper.args[0])
+                        val = oper.args[1]
+                    elif oper.name == 'div':
+                        for i in args.keys():
+                            args[i] *= int(oper.args[0])
+                        val = oper.args[1]
+                    if is_constant(val):
+                        return args[str(val)]
+    except:
+        return False
+    return False
 
 def br_two(functions, op):
     val = op.value
@@ -273,6 +311,13 @@ def unroll_label(source, functions, l):
                                         [op.args[1][0], '%'+get_prev_name(reduce_to_value(op.args[1][1]),
                                          cur_f.ssa_map_lbl)]]))
             continue
+        elif op.name == 'switch':
+            lbl = find_val(functions, op)
+            if not lbl:
+                return False, functions
+            else:
+                res, functions = unroll_label(source, functions, source.label_map[lbl[1:]])
+                return res, functions
         functions[-1].labels[-1].operations.append(copy.deepcopy(op))
 
 def clear_labels(functions):
@@ -288,11 +333,11 @@ def clear_labels(functions):
 
 def rename_label(old_name, new_name, f):
     for lbl in f.labels:
-        if lbl.operations[-1].name == 'br' and lbl.operations[-1].args:
+        if len(lbl.operations) > 0 and lbl.operations[-1].name == 'br' and lbl.operations[-1].args:
             for i in range(0, len(lbl.operations[-1].args)):
                 if lbl.operations[-1].args[i] == '%'+old_name:
                     lbl.operations[-1].args[i] = new_name
-        elif lbl.operations[-1].name == 'br':
+        elif len(lbl.operations) > 0 and lbl.operations[-1].name == 'br':
             if lbl.operations[-1].value == '%'+old_name:
                 lbl.operations[-1].value = new_name
     return f
@@ -422,5 +467,5 @@ def parse_llvm(filename, progress):
 if __name__ == "__main__":
     sss = WorkerSignals()
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", sss.progress)
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna_1.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", sss.progress)
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna_4.ll", sss.progress)

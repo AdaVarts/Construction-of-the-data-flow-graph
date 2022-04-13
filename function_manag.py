@@ -12,6 +12,7 @@ def get_ret_values(function, progress):
                 ind = function.ssa_map_var[function.name+'_'+param+'.1'] - 1
             except:
                 ind = function.ssa_map_var[function.name+'_'+param] - 1
+            if ind == 0: continue
             var = f'{function.name}_{param}.1-{ind}'
             res.append(var)
         except:
