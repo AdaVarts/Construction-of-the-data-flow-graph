@@ -45,6 +45,9 @@ def save_one_tail(index, dfg, op):
     dfg, node = save_node(dfg, op.value)
     try:
         dfg, node1 = save_node(dfg, op.args[index])
+        for elem in set(node.incoming).intersection(node1.outgoing):
+            if op.name == elem.name:
+                return dfg
         edge = Edge(op.name, node1, node) 
     except:
         edge = Edge(op.name, None, node) 
@@ -94,6 +97,7 @@ def dfs(node, k, distance, path, map_path):
                 map_path[edge.tail.name] = []
                 map_path[edge.tail.name].append([item for item in path])
             elif is_constant(edge.tail.name):
+
                 map_path[edge.tail.name].append([item for item in path])
             path.pop()
             continue
@@ -171,29 +175,29 @@ if __name__ == "__main__":
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
     try:
-        functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", sss.progress)
+        functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
     except:
         print("some error")
     # func = merge_in_one(functions, 'encrypt', [], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
-    func = merge_in_one(functions, 'blowfish_key_setup', [], [], sss.progress)
+    func = merge_in_one(functions, 'blowfish_key_setup', ['loop'], [], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
-    get_ret_values(func, sss.progress)
-    # dfg = create_dfg(func, sss.progress)
+    # get_ret_values(func, sss.progress)
+    dfg = create_dfg(func, sss.progress)
     # for key in dfg.nodes.keys():
     #     if 'encrypt' not in key:
     #         print(key)
     print("*******")
     # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
-    # start_DFG(dfg, func, 5, f'encrypt_%state-63', sss.progress)
+    start_DFG(dfg, func, 3, f'blowfish_key_setup_%keystruct.1-3', sss.progress)
     # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 7, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 9, f'encrypt_%state-63', sss.progress)
     # path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
     # for i, n in path.items():
-        # print(n)
-    
+    #     print(n)
+    print("end")
     # for f in functions:
     #     if f.name == 'encrypt':
     #         start_DFG(f)

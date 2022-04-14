@@ -1,6 +1,6 @@
 import copy
 from classes import Function, Operation, Label, WorkerSignals
-from memory_management import memory_manag, rename_front_arg
+from memory_management import memory_manag, is_overwritten
 from addit_methods import *
 # import sys
 # sys.setrecursionlimit(3000)
@@ -428,13 +428,21 @@ def unroll_llvm(fs, known_funcs, progress):
     
     progress.emit("start variable identification")
     for f in functions:
+        for param in f.params:
+            if param == '': continue
+            if not is_overwritten(f, f.name+'_'+param, 0, 0) and f.name+'_'+param in f.ssa_map_var.keys():
+                f.ssa_map_var[f.name+'_'+param] += 1
+    for f in functions:
         for l in f.labels:
             for op in l.operations:
                 if op.name != 'br' and op.value != '':
                     if op.args is not None:
                         for i in range(0, len(op.args)):
                             if not is_constant(op.args[i]):
-                                op.args[i] = get_prev_name(op.args[i], f.ssa_map_var)
+                                # if get_name_without_func(op.args[i]) in f.params:
+                                #     op.args[i] = get_current_name_var(op.args[i], f)
+                                # else:
+                                op.args[i] = get_prev_name(op.args[i], f.ssa_map_var, f)
                     # var = get_prev_name(op.value, f.ssa_map_var)
                     op.value = set_new_name(op.value, f.ssa_map_var)
                 elif op.name == 'ret' and len(op.args) > 0 and op.args[0] != '':
@@ -467,5 +475,5 @@ def parse_llvm(filename, progress):
 if __name__ == "__main__":
     sss = WorkerSignals()
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish.ll", sss.progress)
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna_4.ll", sss.progress)
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna_4.ll", sss.progress)

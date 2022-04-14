@@ -51,11 +51,11 @@ def set_new_name(name, map):
     else:
         return real_name+'-'+str(map[real_name]-1)
 
-def get_prev_name(name, map):
+def get_prev_name(name, map, f=None):
     real_name = get_the_real_name(name)
     if real_name not in map:
         return real_name
-    if map[real_name]-1 == 0:
+    if map[real_name]-1 == 0 or map[real_name] == 0:
         return real_name
     return real_name+'-'+str(map[real_name]-1)
 
@@ -66,14 +66,14 @@ def get_current_name(name, function):
     else:
         return real_name+'-'+str(function.ssa_map_lbl[real_name])
 
-# def get_current_name_var(name, function):
-#     real_name = get_the_real_name(name)
-#     if real_name not in function.ssa_map_var:
-#         return name
-#     if function.ssa_map_var[real_name] == 0:
-#         return name
-#     else:
-#         return real_name+'-'+str(function.ssa_map_var[real_name])
+def get_current_name_var(name, function):
+    real_name = get_the_real_name(name)
+    if real_name not in function.ssa_map_var:
+        return name
+    if function.ssa_map_var[real_name] == 0:
+        return name
+    else:
+        return real_name+'-'+str(function.ssa_map_var[real_name])
 
 def get_the_real_name(name):
     return name.split('-')[0]
@@ -82,3 +82,6 @@ def is_constant(value):
     if '%' not in value:
         return True
     return False
+
+def get_name_without_func(name):
+    return '%'+name.split('%')[1]
