@@ -58,18 +58,31 @@ def memory_manag(fs, k_fs):
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
 
+    with open("F:\\STU\\FIIT\\BP\\output_mem_man_before.txt", "w") as f:
+        for func in fs:
+            f.write(func.name)
+            f.write('\n')
+            f.write(str(func.params))
+            f.write('\n')
+            for label in func.labels:
+                f.write('   '+label.name+'\n')
+                for op in label.operations:
+                    f.write('      '+op.name+': '+op.value+'\n')
+                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
                 if op.name == 'store':
                     if (not is_used_front(f, op.args[0], l.operations.index(op)+1, f.labels.index(l)) and
                        is_used_backw(f, op.args[0], l.operations.index(op)-1, f.labels.index(l)) and
-                       is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l)) is False):
+                       is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l)) is False and
+                       is_arr(f, op.args[0], l.operations.index(op)-1, f.labels.index(l)) is False):
                         rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
 
-    with open("F:\\STU\\FIIT\\BP\\output_mem_man.txt", "w") as f:
+    with open("F:\\STU\\FIIT\\BP\\output_mem_man_1.txt", "w") as f:
         for func in fs:
             f.write(func.name)
             f.write('\n')
@@ -90,6 +103,18 @@ def memory_manag(fs, k_fs):
                     op.args.append(op.value)
                     l.operations.insert(l.operations.index(op)+1, Operation("store", val, [op.value]))
                     f = store_into_arr_check(f, l, l.operations[l.operations.index(op)+1])
+    
+    with open("F:\\STU\\FIIT\\BP\\output_mem_man_after_1.txt", "w") as f:
+        for func in fs:
+            f.write(func.name)
+            f.write('\n')
+            f.write(str(func.params))
+            f.write('\n')
+            for label in func.labels:
+                f.write('   '+label.name+'\n')
+                for op in label.operations:
+                    f.write('      '+op.name+': '+op.value+'\n')
+                    if op.args is not None: f.write('         '+str(op.args)+'\n')
     return fs
 
 def store_into_arr_check(f, l, op):
