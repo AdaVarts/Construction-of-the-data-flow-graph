@@ -11,14 +11,17 @@ from pycparser import parse_file#, preprocess_file
 # from llvmlite import ir
 # from llvmlite import binding
 import llvm_g 
+import os
 # import io
 # import ast
 from classes import DFG, Edge, Node, WorkerSignals
 
 def translate_to_c(filename, printW):
+    directory = os.getcwd().replace('\\','/')
+    path = f'-I{directory}/fake_libc_include'
     st = parse_file(filename, use_cpp=True, 
             cpp_path='gcc', 
-            cpp_args=['-E', r'-IC:/Users/Adalina/AppData/Local/Programs/Python/Python37/Lib/site-packages/pycparser/utils/fake_libc_include'],
+            cpp_args=['-E', r''+path],
             integer_types=False)
             # cpp_args=['-E'])
     f = open("F:\\STU\\FIIT\\BP\\ast_pr.txt", "w")
@@ -155,8 +158,12 @@ def convert_C_into_llvm(filename, printW):
 
 if __name__ == "__main__":
     sss = WorkerSignals()
+
+    directory = os.getcwd()
+
+    print(directory)
     
-    # module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
     # module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
     # module = translate_to_c("F:\\STU\\FIIT\\BP\\blowfish.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
@@ -174,23 +181,27 @@ if __name__ == "__main__":
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    try:
-        functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
-    except:
-        print("some error")
+    # try:
+    #     functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
+    # except:
+    #     print("some error")
     # func = merge_in_one(functions, 'encrypt', [], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
-    func = merge_in_one(functions, 'blowfish_key_setup', ['loop'], [], sss.progress)
+    # func = merge_in_one(functions, 'blowfish_key_setup', ['loop'], [], sss.progress)
+    # func = merge_in_one(functions, 'blowfish_encrypt', [], [], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     # get_ret_values(func, sss.progress)
-    dfg = create_dfg(func, sss.progress)
+    # dfg = create_dfg(func, sss.progress)
+    # num = 0
     # for key in dfg.nodes.keys():
-    #     if 'encrypt' not in key:
+    #     if 'blowfish_encrypt' not in key:
     #         print(key)
-    print("*******")
+    #         num += 1
+    # print("*******")
+    # print(num)
     # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
-    start_DFG(dfg, func, 3, f'blowfish_key_setup_%keystruct.1-3', sss.progress)
+    # start_DFG(dfg, func, 3, f'blowfish_key_setup_%keystruct.1-3', sss.progress)
     # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 7, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 9, f'encrypt_%state-63', sss.progress)
