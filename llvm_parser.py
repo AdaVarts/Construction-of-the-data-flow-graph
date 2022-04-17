@@ -135,32 +135,12 @@ def load_llvm(filename, progress):
     progress.emit("end loading")
     progress.emit("start customising")
 
-    with open("F:\\STU\\FIIT\\BP\\parsed_llvm.txt", "w") as f:
-        for func in functions:
-            f.write(func.name)
-            f.write('\n')
-            f.write(str(func.params))
-            f.write('\n')
-            for label in func.labels:
-                f.write('   '+label.name+'\n')
-                for op in label.operations:
-                    f.write('      '+op.name+': '+op.value+'\n')
-                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+    save_into_logs(functions, "parsed_llvm.txt")
 
     functions = memory_manag(functions, known_funcs)
     progress.emit("end memory management")
 
-    with open("F:\\STU\\FIIT\\BP\\output_llvm.txt", "w") as f:
-        for func in functions:
-            f.write(func.name)
-            f.write('\n')
-            f.write(str(func.params))
-            f.write('\n')
-            for label in func.labels:
-                f.write('   '+label.name+'\n')
-                for op in label.operations:
-                    f.write('      '+op.name+': '+op.value+'\n')
-                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+    save_into_logs(functions, "output_llvm.txt")
     print('-----')
     for func in known_funcs:
         print(func)
@@ -370,17 +350,7 @@ def unroll_llvm(fs, known_funcs, progress):
                         op.args[2] = f.name+'_'+op.args[2]
     progress.emit("end function identification")
 
-    with open("F:\\STU\\FIIT\\BP\\func_id.txt", "w") as f:
-        for func in fs:
-            f.write(func.name)
-            f.write('\n')
-            f.write(str(func.params))
-            f.write('\n')
-            for label in func.labels:
-                f.write('   '+label.name+'\n')
-                for op in label.operations:
-                    f.write('      '+op.name+': '+op.value+'\n')
-                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+    save_into_logs(functions, "func_id.txt")
 
     progress.emit("start unrolling")
     fs = clear_labels(fs)
@@ -400,30 +370,10 @@ def unroll_llvm(fs, known_funcs, progress):
                 functions[-1].labels.append(Label(set_new_name(lbl.name, functions[-1].ssa_map_lbl)))
                 for op in lbl.operations:
                     functions[-1].labels[-1].operations.append(copy.deepcopy(op))
-        with open("F:\\STU\\FIIT\\BP\\output_unroll_before_ssa.txt", "w") as f:
-            for func in functions:
-                f.write(func.name)
-                f.write('\n')
-                f.write(str(func.params))
-                f.write('\n')
-                for label in func.labels:
-                    f.write('   '+label.name+'\n')
-                    for op in label.operations:
-                        f.write('      '+op.name+': '+op.value+'\n')
-                        if op.args is not None: f.write('         '+str(op.args)+'\n')
+
     progress.emit("end unrolling")
 
-    with open("F:\\STU\\FIIT\\BP\\output_unroll_before_ssa.txt", "w") as f:
-        for func in functions:
-            f.write(func.name)
-            f.write('\n')
-            f.write(str(func.params))
-            f.write('\n')
-            for label in func.labels:
-                f.write('   '+label.name+'\n')
-                for op in label.operations:
-                    f.write('      '+op.name+': '+op.value+'\n')
-                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+    save_into_logs(functions, "output_unroll_before_ssa.txt")
 
     
     progress.emit("start variable identification")
@@ -452,17 +402,7 @@ def unroll_llvm(fs, known_funcs, progress):
     progress.emit("end variable identification")
     print("*******************************************************************")
     
-    with open("F:\\STU\\FIIT\\BP\\output_unroll.txt", "w") as f:
-        for func in functions:
-            f.write(func.name)
-            f.write('\n')
-            f.write(str(func.params))
-            f.write('\n')
-            for label in func.labels:
-                f.write('   '+label.name+'\n')
-                for op in label.operations:
-                    f.write('      '+op.name+': '+op.value+'\n')
-                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+    save_into_logs(functions, "output_unroll.txt")
 
     return functions
 

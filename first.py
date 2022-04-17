@@ -17,14 +17,15 @@ import os
 from classes import DFG, Edge, Node, WorkerSignals
 
 def translate_to_c(filename, printW):
-    directory = os.getcwd().replace('\\','/')
-    path = f'-I{directory}/fake_libc_include'
+    directory = os.getcwd()
+    dir_for_path = directory.replace('\\','/')
+    path = f'-I{dir_for_path}/fake_libc_include'
     st = parse_file(filename, use_cpp=True, 
             cpp_path='gcc', 
             cpp_args=['-E', r''+path],
             integer_types=False)
             # cpp_args=['-E'])
-    f = open("F:\\STU\\FIIT\\BP\\ast_pr.txt", "w")
+    f = open(f"{directory}\\logs\\ast_pr.txt", "w")
     st.show(buf = f)
     f.close()
 

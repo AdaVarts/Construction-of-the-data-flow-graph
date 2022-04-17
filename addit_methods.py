@@ -1,3 +1,5 @@
+import os
+
 def get_name(name):
     if '\n' in name:
         name = name.replace('\n', '')
@@ -85,3 +87,20 @@ def is_constant(value):
 
 def get_name_without_func(name):
     return '%'+name.split('%')[1]
+
+
+
+def save_into_logs(functions, filename):
+    directory = os.getcwd()
+    file = f"{directory}\\logs\\{filename}"
+    with open(file, "w") as f:
+        for func in functions:
+            f.write(func.name)
+            f.write('\n')
+            f.write(str(func.params))
+            f.write('\n')
+            for label in func.labels:
+                f.write('   '+label.name+'\n')
+                for op in label.operations:
+                    f.write('      '+op.name+': '+op.value+'\n')
+                    if op.args is not None: f.write('         '+str(op.args)+'\n')

@@ -268,28 +268,18 @@ class Ui_ConstructorWindow(object):
         font.setPointSize(10)
         self.btnDisplayDFG.setFont(font)
         self.btnDisplayDFG.setObjectName("btnDisplayDFG")
-        self.btnDisplayDFG.setEnabled = False
+        self.btnDisplayDFG.setEnabled(False)
         self.gridLayout.addWidget(self.btnDisplayDFG, 15, 0, 1, 3)
         
         MainWindow.setCentralWidget(self.centralwidget)
-        # toolbar = QToolBar("My main toolbar")
-        # self.addToolBar(toolbar)
-
-        # button_action = QtWidgets.QAction("Your button", self)
-        # button_action.setStatusTip("This is your button")
-        # button_action.triggered.connect(self.onMyToolBarButtonClick)
-        # toolbar.addAction(button_action)
 
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1128, 21))
         self.menubar.setObjectName("menubar")
 
-        # self.menuBack = QtWidgets.QMenu(self.menubar)
-        # self.menuBack.setObjectName("menuBack")
         MainWindow.setMenuBar(self.menubar)
         self.actionBack = QtWidgets.QAction(MainWindow)
         self.actionBack.setObjectName("actionBack")
-        # self.menuBack.addAction(self.actionBack)
 
         self.menubar.addAction(self.actionBack)
 
@@ -426,21 +416,30 @@ class Ui_ConstructorWindow(object):
         self.lineInstrsNum.setText(str(len(result.labels[0].operations)))
         self.listArgs.addItems(result.params)
         if result.labels[0].operations[-1].args[0] == '':
-            # self.listReturnValues.addItems(result.params)
+            self.btnDisplayDFG.setEnabled(False)
+            self.btnFindNodes.setEnabled(False)
+            self.btnGenerate.setEnabled(False)
             worker = Worker(get_ret_values, result)
             worker.signals.result.connect(self.set_return_val)
             worker.signals.progress.connect(self.reportProgress)
             self.threadpool.start(worker)
         else:
             self.listReturnValues.addItem(result.labels[0].operations[-1].args[0])
-        # self.lineRetValue.setText(result.labels[0].operations[-1].args[0])
 
     def set_return_val(self, ret_values):
         self.listReturnValues.addItems(ret_values)
+        self.btnDisplayDFG.setEnabled(True)
+        self.btnFindNodes.setEnabled(True)
+        self.btnGenerate.setEnabled(True)
 
     def find_nodes(self):
         distance = self.lineDistance.text()
+        self.listFoundNodes.clear()
+        self.lineNodesNum.setText('')
         if distance and self.function is not None:
+            self.btnDisplayDFG.setEnabled(False)
+            self.btnFindNodes.setEnabled(False)
+            self.btnGenerate.setEnabled(False)
             worker = Worker(create_dfg, self.function)
             worker.signals.result.connect(self.save_dfg)
             worker.signals.progress.connect(self.reportProgress)
@@ -468,6 +467,9 @@ class Ui_ConstructorWindow(object):
         for node, value in self.dfg.map_path.items():
             for val in value:
                 self.listFoundNodes.addItem(str(node))
+        self.btnDisplayDFG.setEnabled(True)
+        self.btnFindNodes.setEnabled(True)
+        self.btnGenerate.setEnabled(True)
     
     def show_dfg_path(self):
         if len(self.listFoundNodes.selectedItems()) == 1 and self.dfg is not None:

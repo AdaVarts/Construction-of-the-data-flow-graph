@@ -1,5 +1,5 @@
 import copy
-from addit_methods import is_constant
+from addit_methods import is_constant, save_into_logs
 from classes import Function
 
 from memory_management import rename_front_arg
@@ -63,16 +63,7 @@ def delete_f(dest: Function, source: Function, progress):
                 rename_front_arg(dest, op.value, op.args[0], l.operations.index(op)+1, dest.labels.index(l))
                 l.operations.pop(l.operations.index(op))
     
-    with open("F:\\STU\\FIIT\\BP\\dell_func.txt", "w") as f:
-        f.write(dest.name)
-        f.write('\n')
-        f.write(str(dest.params))
-        f.write('\n')
-        for label in dest.labels:
-            f.write('   '+label.name+'\n')
-            for op in label.operations:
-                f.write('      '+op.name+': '+op.value+'\n')
-                if op.args is not None: f.write('         '+str(op.args)+'\n')
+    save_into_logs([dest], "dell_func.txt")
 
 def merge_two_funcs(dest: Function, source: Function, progress):
     if len(source.labels) > 1:
@@ -82,17 +73,7 @@ def merge_two_funcs(dest: Function, source: Function, progress):
         substitute(dest, source, 0, 0, 0, progress)
 
 
-
-        with open("F:\\STU\\FIIT\\BP\\encrypt.txt", "w") as f:
-            f.write(dest.name)
-            f.write('\n')
-            f.write(str(dest.params))
-            f.write('\n')
-            for label in dest.labels:
-                f.write('   '+label.name+'\n')
-                for op in label.operations:
-                    f.write('      '+op.name+': '+op.value+'\n')
-                    if op.args is not None: f.write('         '+str(op.args)+'\n')
+        save_into_logs([dest], f"{dest.name}.txt")
 
 def substitute(dest:Function, source: Function, l_i, op_i, counter_f, progress):
     op = op_i
