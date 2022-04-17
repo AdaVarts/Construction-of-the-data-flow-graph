@@ -1,0 +1,678 @@
+fromHexStringToBytes
+['%block']
+   .3
+      malloc: %bytes
+         []
+      store: %i
+         ['0']
+      br: %for_precond
+   for_precond
+      icmp: %.13
+         ['slt', '%i', '8']
+      br: %.13
+         ['%for_loop', '%for_end']
+   for_loop
+      getelementptr: %.17
+         ['%bytes', '%i']
+      mul: %.21
+         ['2', '%i']
+      getelementptr: %.23
+         ['%block', '%.21']
+      icmp: %.25
+         ['sge', '%.23', '48']
+      mul: %.27
+         ['2', '%i']
+      getelementptr: %.29
+         ['%block', '%.27']
+      icmp: %.31
+         ['sle', '%.29', '57']
+      icmp: %.32
+         ['ne', '%.25', '0']
+      icmp: %.33
+         ['ne', '%.31', '0']
+      and: %.34
+         ['%.32', '%.33']
+      br: %.34
+         ['%for_loop.if', '%for_loop.else']
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%bytes']
+   for_loop.if
+      mul: %.37
+         ['2', '%i']
+      getelementptr: %.39
+         ['%block', '%.37']
+      sub: %.41
+         ['%.39', '48']
+      br: %for_loop.endif
+   for_loop.else
+      mul: %.44
+         ['2', '%i']
+      getelementptr: %.46
+         ['%block', '%.44']
+      sub: %.48
+         ['%.46', '97']
+      add: %.50
+         ['%.48', '10']
+      br: %for_loop.endif
+   for_loop.endif
+      phi: %.53
+         [['%.41', '%for_loop.if'], ['%.50', '%for_loop.else']]
+      store: %.17
+         ['%.53', '%.17']
+      store: %bytes
+         ['%.17']
+      getelementptr: %.57
+         ['%bytes', '%i']
+      mul: %.61
+         ['2', '%i']
+      add: %.62
+         ['%.61', '1']
+      getelementptr: %.64
+         ['%block', '%.62']
+      icmp: %.66
+         ['sge', '%.64', '48']
+      mul: %.68
+         ['2', '%i']
+      add: %.69
+         ['%.68', '1']
+      getelementptr: %.71
+         ['%block', '%.69']
+      icmp: %.73
+         ['sle', '%.71', '57']
+      icmp: %.74
+         ['ne', '%.66', '0']
+      icmp: %.75
+         ['ne', '%.73', '0']
+      and: %.76
+         ['%.74', '%.75']
+      br: %.76
+         ['%for_loop.endif.if', '%for_loop.endif.else']
+   for_loop.endif.if
+      mul: %.79
+         ['2', '%i']
+      add: %.80
+         ['%.79', '1']
+      getelementptr: %.82
+         ['%block', '%.80']
+      sub: %.84
+         ['%.82', '48']
+      br: %for_loop.endif.endif
+   for_loop.endif.else
+      mul: %.87
+         ['2', '%i']
+      add: %.88
+         ['%.87', '1']
+      getelementptr: %.90
+         ['%block', '%.88']
+      sub: %.92
+         ['%.90', '97']
+      add: %.94
+         ['%.92', '10']
+      br: %for_loop.endif.endif
+   for_loop.endif.endif
+      phi: %.97
+         [['%.84', '%for_loop.endif.if'], ['%.94', '%for_loop.endif.else']]
+      store: %.57
+         ['%.97', '%.57']
+      store: %bytes
+         ['%.57']
+      br: %for_cond
+fromBytesToLong
+['%bytes']
+   .3
+      store: %result
+         ['0']
+      store: %i
+         ['0']
+      br: %for_precond
+   for_precond
+      icmp: %.11
+         ['slt', '%i', '8']
+      br: %.11
+         ['%for_loop', '%for_end']
+   for_loop
+      shl: %.14
+         ['%result', '4']
+      getelementptr: %.17
+         ['%bytes', '%i']
+      and: %.20
+         ['%.17', '0xFUL']
+      or: %result
+         ['%.14', '%.20']
+      shl: %.24
+         ['%result', '4']
+      getelementptr: %.27
+         ['%bytes', '%i']
+      and: %.30
+         ['%.27', '0xFUL']
+      or: %result
+         ['%.24', '%.30']
+      br: %for_cond
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%result']
+fromHexStringToLong
+['%block']
+   .3
+      store: %result
+         ['0']
+      store: %i
+         ['0']
+      br: %for_precond
+   for_precond
+      icmp: %.10
+         ['slt', '%i', '16']
+      br: %.10
+         ['%for_loop', '%for_end']
+   for_loop
+      shl: %.13
+         ['%result', '4']
+      getelementptr: %.16
+         ['%block', '%i']
+      icmp: %.18
+         ['sge', '%.16', '48']
+      getelementptr: %.21
+         ['%block', '%i']
+      icmp: %.23
+         ['sle', '%.21', '57']
+      icmp: %.24
+         ['ne', '%.18', '0']
+      icmp: %.25
+         ['ne', '%.23', '0']
+      and: %.26
+         ['%.24', '%.25']
+      br: %.26
+         ['%for_loop.if', '%for_loop.else']
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%result']
+   for_loop.if
+      getelementptr: %.30
+         ['%block', '%i']
+      sub: %.32
+         ['%.30', '48']
+      br: %for_loop.endif
+   for_loop.else
+      getelementptr: %.36
+         ['%block', '%i']
+      sub: %.38
+         ['%.36', '97']
+      add: %.40
+         ['%.38', '10']
+      br: %for_loop.endif
+   for_loop.endif
+      phi: %.42
+         [['%.32', '%for_loop.if'], ['%.40', '%for_loop.else']]
+      or: %result
+         ['%.13', '%.42']
+      br: %for_cond
+fromLongToBytes
+['%block']
+   .3
+      malloc: %bytes
+         []
+      store: %i
+         ['7']
+      br: %for_precond
+   for_precond
+      icmp: %.13
+         ['sge', '%i', '0']
+      br: %.13
+         ['%for_loop', '%for_end']
+   for_loop
+      getelementptr: %.17
+         ['%bytes', '%i']
+      sub: %.22
+         ['7', '%i']
+      mul: %.23
+         ['2', '%.22']
+      mul: %.24
+         ['%.23', '4']
+      lshr: %.25
+         ['%block', '%.24']
+      and: %.27
+         ['%.25', '0xFLL']
+      store: %.17
+         ['%.27', '%.17']
+      store: %bytes
+         ['%.17']
+      getelementptr: %.31
+         ['%bytes', '%i']
+      sub: %.36
+         ['7', '%i']
+      mul: %.37
+         ['2', '%.36']
+      add: %.38
+         ['%.37', '1']
+      mul: %.39
+         ['%.38', '4']
+      lshr: %.40
+         ['%block', '%.39']
+      and: %.42
+         ['%.40', '0xFLL']
+      store: %.31
+         ['%.42', '%.31']
+      store: %bytes
+         ['%.31']
+      br: %for_cond
+   for_cond
+      sub: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%bytes']
+fromLongToHexString
+['%block']
+   .3
+      malloc: %hexString
+         []
+      ret: 
+         ['%hexString']
+Sbox
+['%input']
+   .3
+      getelementptr: %.6
+         ['S', '%input']
+      ret: 
+         ['%.6']
+inverseSbox
+['%input']
+   .3
+      getelementptr: %.6
+         ['invS', '%input']
+      ret: 
+         ['%.6']
+permute
+['%source']
+   .3
+      store: %permutation
+         ['0']
+      store: %i
+         ['0']
+      br: %for_precond
+   for_precond
+      icmp: %.11
+         ['slt', '%i', '64']
+      br: %.11
+         ['%for_loop', '%for_end']
+   for_loop
+      sub: %distance
+         ['63', '%i']
+      lshr: %.20
+         ['%source', '%distance']
+      and: %.21
+         ['%.20', '0x1']
+      getelementptr: %.23
+         ['P', '%i']
+      sub: %.25
+         ['63', '%.23']
+      shl: %.26
+         ['%.21', '%.25']
+      or: %permutation
+         ['%permutation', '%.26']
+      br: %for_cond
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%permutation']
+inversepermute
+['%source']
+   .3
+      store: %permutation
+         ['0']
+      store: %i
+         ['0']
+      br: %for_precond
+   for_precond
+      icmp: %.11
+         ['slt', '%i', '64']
+      br: %.11
+         ['%for_loop', '%for_end']
+   for_loop
+      getelementptr: %.15
+         ['P', '%i']
+      sub: %distance
+         ['63', '%.15']
+      shl: %.20
+         ['%permutation', '1']
+      lshr: %.23
+         ['%source', '%distance']
+      and: %.24
+         ['%.23', '0x1']
+      or: %permutation
+         ['%.20', '%.24']
+      br: %for_cond
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%permutation']
+getKeyLow
+['%key']
+   .3
+      store: %keyLow
+         ['0']
+      store: %i
+         ['16']
+      br: %for_precond
+   for_precond
+      icmp: %.11
+         ['slt', '%i', '20']
+      br: %.11
+         ['%for_loop', '%for_end']
+   for_loop
+      shl: %.14
+         ['%keyLow', '4']
+      getelementptr: %.17
+         ['%key', '%i']
+      icmp: %.19
+         ['sge', '%.17', '48']
+      getelementptr: %.22
+         ['%key', '%i']
+      icmp: %.24
+         ['sle', '%.22', '57']
+      icmp: %.25
+         ['ne', '%.19', '0']
+      icmp: %.26
+         ['ne', '%.24', '0']
+      and: %.27
+         ['%.25', '%.26']
+      br: %.27
+         ['%for_loop.if', '%for_loop.else']
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%keyLow']
+   for_loop.if
+      getelementptr: %.31
+         ['%key', '%i']
+      sub: %.33
+         ['%.31', '48']
+      br: %for_loop.endif
+   for_loop.else
+      getelementptr: %.37
+         ['%key', '%i']
+      sub: %.39
+         ['%.37', '97']
+      add: %.41
+         ['%.39', '10']
+      br: %for_loop.endif
+   for_loop.endif
+      phi: %.43
+         [['%.33', '%for_loop.if'], ['%.41', '%for_loop.else']]
+      and: %.45
+         ['%.43', '0xF']
+      or: %keyLow
+         ['%.14', '%.45']
+      br: %for_cond
+generateSubkeys
+['%key']
+   .3
+      fromHexStringToLong: %keyHigh
+         ['%key']
+      getKeyLow: %keyLow
+         ['%key']
+      malloc: %subKeys
+         []
+      getelementptr: %.19
+         ['%subKeys', '0']
+      store: %.19
+         ['%keyHigh', '%.19']
+      store: %subKeys
+         ['%.19']
+      store: %i
+         ['1']
+      br: %for_precond
+   for_precond
+      icmp: %.25
+         ['slt', '%i', '32']
+      br: %.25
+         ['%for_loop', '%for_end']
+   for_loop
+      store: %temp1
+         ['%keyHigh']
+      store: %temp2
+         ['%keyLow']
+      shl: %.34
+         ['%keyHigh', '61']
+      shl: %.36
+         ['%temp2', '45']
+      or: %.37
+         ['%.34', '%.36']
+      lshr: %.39
+         ['%temp1', '19']
+      or: %keyHigh
+         ['%.37', '%.39']
+      lshr: %.43
+         ['%temp1', '3']
+      and: %keyLow
+         ['%.43', '0xFFFF']
+      lshr: %.48
+         ['%keyHigh', '60']
+      Sbox: %temp
+         ['%.48']
+      and: %keyHigh
+         ['%keyHigh', '0x0FFFFFFFFFFFFFFFLL']
+      shl: %.57
+         ['%temp', '60']
+      or: %keyHigh
+         ['%keyHigh', '%.57']
+      and: %.62
+         ['%i', '0x01']
+      shl: %.63
+         ['%.62', '15']
+      xor: %keyLow
+         ['%keyLow', '%.63']
+      lshr: %.68
+         ['%i', '1']
+      xor: %keyHigh
+         ['%keyHigh', '%.68']
+      getelementptr: %.73
+         ['%subKeys', '%i']
+      store: %.73
+         ['%keyHigh', '%.73']
+      store: %subKeys
+         ['%.73']
+      br: %for_cond
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      ret: 
+         ['%subKeys']
+encrypt
+['%plaintext', '%key']
+   .4
+      generateSubkeys: %subkeys
+         ['%key']
+      fromHexStringToLong: %state
+         ['%plaintext']
+      store: %j
+         ['0']
+      store: %i
+         ['0']
+      br: %for_precond
+   for_precond
+      icmp: %.21
+         ['slt', '%i', '31']
+      br: %.21
+         ['%for_loop', '%for_end']
+   for_loop
+      getelementptr: %.26
+         ['%subkeys', '%i']
+      xor: %state
+         ['%state', '%.26']
+      fromLongToBytes: %stateBytes
+         ['%state']
+      store: %j
+         ['0']
+      br: %for_precond.1
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      getelementptr: %.79
+         ['%subkeys', '31']
+      xor: %state
+         ['%state', '%.79']
+      fromLongToHexString: %.85
+         ['%state']
+      ret: 
+         ['%.85']
+   for_precond.1
+      icmp: %.38
+         ['slt', '%j', '8']
+      br: %.38
+         ['%for_loop.1', '%for_end.1']
+   for_loop.1
+      getelementptr: %.42
+         ['%stateBytes', '%j']
+      getelementptr: %.47
+         ['%stateBytes', '%j']
+      Sbox: %.49
+         ['%.47']
+      store: %.42
+         ['%.49', '%.42']
+      store: %stateBytes
+         ['%.42']
+      getelementptr: %.53
+         ['%stateBytes', '%j']
+      getelementptr: %.58
+         ['%stateBytes', '%j']
+      Sbox: %.60
+         ['%.58']
+      store: %.53
+         ['%.60', '%.53']
+      store: %stateBytes
+         ['%.53']
+      br: %for_cond.1
+   for_cond.1
+      add: %j
+         ['%j', '1']
+      br: %for_precond.1
+   for_end.1
+      fromBytesToLong: %.68
+         ['%stateBytes']
+      permute: %state
+         ['%.68']
+      br: %for_cond
+decrypt
+['%ciphertext', '%key']
+   .4
+      generateSubkeys: %subkeys
+         ['%key']
+      fromHexStringToLong: %state
+         ['%ciphertext']
+      store: %j
+         ['0']
+      store: %i
+         ['0']
+      br: %for_precond
+   for_precond
+      icmp: %.21
+         ['slt', '%i', '31']
+      br: %.21
+         ['%for_loop', '%for_end']
+   for_loop
+      sub: %.25
+         ['31', '%i']
+      getelementptr: %.27
+         ['%subkeys', '%.25']
+      xor: %state
+         ['%state', '%.27']
+      inversepermute: %state
+         ['%state']
+      fromLongToBytes: %stateBytes
+         ['%state']
+      store: %j
+         ['0']
+      br: %for_precond.1
+   for_cond
+      add: %i
+         ['%i', '1']
+      br: %for_precond
+   for_end
+      getelementptr: %.82
+         ['%subkeys', '0']
+      xor: %state
+         ['%state', '%.82']
+      fromLongToHexString: %.88
+         ['%state']
+      ret: 
+         ['%.88']
+   for_precond.1
+      icmp: %.42
+         ['slt', '%j', '8']
+      br: %.42
+         ['%for_loop.1', '%for_end.1']
+   for_loop.1
+      getelementptr: %.46
+         ['%stateBytes', '%j']
+      getelementptr: %.51
+         ['%stateBytes', '%j']
+      inverseSbox: %.53
+         ['%.51']
+      store: %.46
+         ['%.53', '%.46']
+      store: %stateBytes
+         ['%.46']
+      getelementptr: %.57
+         ['%stateBytes', '%j']
+      getelementptr: %.62
+         ['%stateBytes', '%j']
+      inverseSbox: %.64
+         ['%.62']
+      store: %.57
+         ['%.64', '%.57']
+      store: %stateBytes
+         ['%.57']
+      br: %for_cond.1
+   for_cond.1
+      add: %j
+         ['%j', '1']
+      br: %for_precond.1
+   for_end.1
+      fromBytesToLong: %state
+         ['%stateBytes']
+      br: %for_cond
+main
+['']
+   .2
+      malloc: %plaintext
+         []
+      malloc: %key
+         []
+      gets: %.11
+         []
+      gets: %.13
+         []
+      encrypt: %ciphertext
+         ['%plaintext', '%key']
+      decrypt: %.24
+         ['%ciphertext', '%key']
+      ret: 
+         ['0']
