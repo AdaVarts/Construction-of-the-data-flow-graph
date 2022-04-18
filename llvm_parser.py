@@ -74,7 +74,7 @@ def load_llvm(filename, progress):
                         functions[-1].labels[-1].operations.append(Operation(func_call_name,
                                                                             value = '',
                                                                             args=func_call_args))
-            elif 'bitcast' in data:
+            elif 'bitcast' in data or 'inttoptr' in data:
                 functions[-1].labels[-1].operations.append(Operation('bitcast',
                                                                     value=get_name(data[0]),
                                                                     args=[get_name(data[4])]))
@@ -415,5 +415,6 @@ def parse_llvm(filename, progress):
 if __name__ == "__main__":
     sss = WorkerSignals()
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_aes.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna_4.ll", sss.progress)

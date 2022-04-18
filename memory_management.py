@@ -13,7 +13,7 @@ def memory_manag(fs, k_fs):
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
-                if op.name == 'bitcast':
+                if op.name in ['bitcast', 'inttoptr']:
                     rename_backw_val(f, op.value, op.args[0], l.operations.index(op)-1, f.labels.index(l))
                     rename_front_val(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
                     print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
