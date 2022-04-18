@@ -10,7 +10,7 @@ from pycparser import parse_file#, preprocess_file
 # import pyparsing as pp
 # from llvmlite import ir
 # from llvmlite import binding
-import llvm_g 
+import llvm_gen 
 import os
 # import io
 # import ast
@@ -29,9 +29,9 @@ def translate_to_c(filename, printW):
     st.show(buf = f)
     f.close()
 
-    generator = llvm_g.llvm_Generator(printW)
+    generator = llvm_gen.llvm_Generator(printW)
     generator.visit(st)
-    return generator.llvm_module
+    return generator.module
 
 def get_function(module, name_f):
     for f in module.functions:
@@ -165,8 +165,14 @@ if __name__ == "__main__":
     print(directory)
     
     module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
-    # module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
-    # module = translate_to_c("F:\\STU\\FIIT\\BP\\blowfish.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\aes.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\des.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\arcfour.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\base64.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\blowfish.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\md5.c", sss.progress)
+    module = translate_to_c("F:\\STU\\FIIT\\BP\\rot-13.c", sss.progress)
     # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
     # m = module.__str__()
@@ -182,6 +188,7 @@ if __name__ == "__main__":
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_md2.ll", sss.progress)
     # try:
     #     functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
     # except:
@@ -190,6 +197,7 @@ if __name__ == "__main__":
     # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
     # func = merge_in_one(functions, 'blowfish_key_setup', ['loop'], [], sss.progress)
     # func = merge_in_one(functions, 'blowfish_encrypt', [], [], sss.progress)
+    # func = merge_in_one(functions, 'md2_init', [], [], sss.progress)
     
     # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
     # get_ret_values(func, sss.progress)
@@ -201,7 +209,8 @@ if __name__ == "__main__":
     #         num += 1
     # print("*******")
     # print(num)
-    # start_DFG(dfg, func, 4, f'encrypt_%state-63', sss.progress)
+    # start_DFG(dfg, func, 2, f'md2_init_%ctx-64', sss.progress)
+    # start_DFG(dfg, func, 2, f'md2_init_%ctx.1-64', sss.progress)
     # start_DFG(dfg, func, 3, f'blowfish_key_setup_%keystruct.1-3', sss.progress)
     # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)
     # start_DFG(dfg, func, 7, f'encrypt_%state-63', sss.progress)
