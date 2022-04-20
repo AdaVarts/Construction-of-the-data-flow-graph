@@ -24,7 +24,6 @@ def translate_to_c(filename, printW):
             cpp_path='gcc', 
             cpp_args=['-E', r''+path],
             integer_types=False)
-            # cpp_args=['-E'])
     f = open(f"{directory}\\logs\\ast_pr.txt", "w")
     st.show(buf = f)
     f.close()
@@ -82,7 +81,6 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
         return []
     progress.emit(f"starting DFS to length {distance}")
     path = []
-    nodes = []
     try:
         dfs(ret_node, k, int(distance), path, dfg_def.map_path)
     except:
@@ -115,17 +113,8 @@ def create_dfg(function, progress):
     progress.emit("Data Flow Graph: starting to build")
     for op in function.labels[0].operations:
         try:
-            # if op.name == 'store':
-            #     if len(op.args) == 1:
-            #         save_one_tail(0, dfg, op)
-            #     else:
-
             if op.name == 'br' or op.name == 'ret':
-                continue
-            # elif op.name == 'ret':
-            #     dfg, node1 = save_node(dfg, op.args[0])
-            #     edge = Edge(op.name, node1) 
-            #     dfg.edges.append(edge)  
+                continue 
             elif op.name == 'phi':
                 dfg, node = save_node(dfg, op.value)
                 dfg, node1 = save_node(dfg, op.args[0][0])
@@ -144,7 +133,6 @@ def create_dfg(function, progress):
         except Exception as e:
             progress.emit(f"ValueError: {op.name}  -   {op.value} ; {op.args}  {format(e)}")
     progress.emit("Data Flow Graph: was built")
-    # print(dfg.__str__())
     return dfg
 
 

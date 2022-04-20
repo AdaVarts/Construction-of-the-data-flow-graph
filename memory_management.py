@@ -1,9 +1,8 @@
 from addit_methods import save_into_logs
 from classes import Operation
 
-def memory_manag(fs, k_fs):
+def memory_manag(fs):
     val = None
-    index = None
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -37,7 +36,8 @@ def memory_manag(fs, k_fs):
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
                     elif op.args[0] in f.params:
-                        rename_front_arg(f, op.value, op.args[0], l.operations.index(op)+1, f.labels.index(l))
+                        rename_front_arg(f, op.value, op.args[0], 0, 0)
+                        rename_front_val(f, op.args[0], op.value, 0, 0)
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
 
@@ -122,17 +122,10 @@ def is_overwritten(f, val, index_op, index_l):
             return True
         elif f.labels[index_l].operations[j].args is not None and val in f.labels[index_l].operations[j].args:
             return False
-    # for i in range(index_l+1, len(f.labels)):
-    #     for j in range(0, len(f.labels[i].operations)):
-    #         if f.labels[i].operations[j].value == val:
-    #             return True
-    #         elif f.labels[i].operations[j].args is not None and val in f.labels[i].operations[j].args:
-    #             return False
     return False
 
 def is_used_front(f, val, index_op, index_l):
     for j in range(index_op, len(f.labels[index_l].operations)):
-        # if f.labels[i].operations[j].args is not None and (val in f.labels[i].operations[j].args or val == f.labels[i].operations[j].value):
         if f.labels[index_l].operations[j].args is not None and val in f.labels[index_l].operations[j].args:
             return True
     for i in range(index_l+1, len(f.labels)):

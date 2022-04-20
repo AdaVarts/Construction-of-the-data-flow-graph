@@ -1,5 +1,6 @@
 import typing
 
+# Classes for parsed LLVM
 class Function:
     def __init__(self, name, params):
         self.name = name

@@ -42,7 +42,6 @@ def merge_in_one(fs, name, addsf, delsf, progress):
                 del_function = copy.deepcopy(func)
                 break
         progress.emit(f"start deleting function {del_function.name} from source")
-        # progress.emit(f"Warning: deleting is possible only if functions were not merged! And if function has less than 2 arguments!")
         delete_f(start_f, del_function, progress)
         progress.emit(f"deleting function {del_function.name} completed")
 
@@ -69,7 +68,6 @@ def delete_f(dest: Function, source: Function, progress):
 def merge_two_funcs(dest: Function, source: Function, progress):
     if len(source.labels) > 1:
         progress.emit("Error: The targeted function has more than 1 label")
-        # LOGGER.error("The targeted function has more than 1 label")
     else:
         substitute(dest, source, 0, 0, 0, progress)
 
@@ -94,7 +92,6 @@ def substitute(dest:Function, source: Function, l_i, op_i, counter_f, progress):
                                 if not is_constant(arg_s) and src.params[dest.labels[l].operations[op].args.index(arg)] == arg_s.split('_')[1]:
                                     src.labels[0].operations[src.labels[0].operations.index(oper_s)].args[oper_s.args.index(arg_s)] = arg
                     if src.labels[0].operations[-1].name != 'ret':
-                        # LOGGER.error("Return operation is not the last in source function")
                         progress.emit("Return operation is not the last in source function")
                     ret_value = src.labels[0].operations[-1].args[0]
                     for op_s in src.labels[0].operations[::-1]:

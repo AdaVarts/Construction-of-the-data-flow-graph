@@ -29,7 +29,7 @@ def get_args(data):
     return args
 
 def remove_empty(data):
-    new_d = [ele for ele in data if ele != '']
+    new_d = [item for item in data if item != '']
     return new_d
 
 
@@ -50,8 +50,7 @@ def set_new_name(name, map):
     map[real_name] +=1
     if map[real_name] == 1:
         return name
-    else:
-        return real_name+'-'+str(map[real_name]-1)
+    return real_name+'-'+str(map[real_name]-1)
 
 def get_prev_name(name, map, f=None):
     real_name = get_the_real_name(name)
@@ -65,8 +64,7 @@ def get_current_name(name, function):
     real_name = get_the_real_name(name)
     if function.ssa_map_lbl[real_name] == 0:
         return name
-    else:
-        return real_name+'-'+str(function.ssa_map_lbl[real_name])
+    return real_name+'-'+str(function.ssa_map_lbl[real_name])
 
 def get_current_name_var(name, function):
     real_name = get_the_real_name(name)
@@ -74,8 +72,7 @@ def get_current_name_var(name, function):
         return name
     if function.ssa_map_var[real_name] == 0:
         return name
-    else:
-        return real_name+'-'+str(function.ssa_map_var[real_name])
+    return real_name+'-'+str(function.ssa_map_var[real_name])
 
 def get_the_real_name(name):
     return name.split('-')[0]

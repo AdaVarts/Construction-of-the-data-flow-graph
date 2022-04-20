@@ -56,7 +56,6 @@ def load_llvm(filename, progress):
             elif 'store' in data:
                 functions[-1].labels[-1].operations.append(Operation('store', value=get_name(data[4]),
                                                                     args=[get_name(data[2])]))
-            # elif 'call' in data and '=' in data and '...' not in line:
             elif 'call' in data and '...' not in line:
                 if '=' in data:
                     functions[-1].labels[-1].operations.append(Operation(get_name(data[4].split('(')[0]),
@@ -93,8 +92,6 @@ def load_llvm(filename, progress):
                                                                             value=get_name(data[0]),
                                                                             args=[get_name(word[1].split(' ')[-1]), get_name(word[3].split(' ')[-1])]
                                                                             ))
-                # if len(word) == 4:
-                #     functions[-1].labels[-1].operations[-1].args.append(get_name(word[3].split(' ')[-1]))
                 else:
                     functions[-1].labels[-1].operations.append(Operation('getelementptr',
                                                                         value=get_name(data[0]),
@@ -137,7 +134,7 @@ def load_llvm(filename, progress):
 
     save_into_logs(functions, "parsed_llvm.txt")
 
-    functions = memory_manag(functions, known_funcs)
+    functions = memory_manag(functions)
     progress.emit("end memory management")
 
     save_into_logs(functions, "output_llvm.txt")
@@ -145,12 +142,13 @@ def load_llvm(filename, progress):
     for func in known_funcs:
         print(func)
     
-    return functions, known_funcs
+    return functions
 
 
 def find_val(functions, op):
     val = op.value
-    args = copy.deepcopy(op.args[1])
+    orig_args = list(op.args[1].keys())
+    args = list(op.args[1].keys())
     try:
         for label in functions[-1].labels[::-1]:
             for oper in label.operations[::-1]:
@@ -158,23 +156,23 @@ def find_val(functions, op):
                     if oper.name == 'load' or oper.name == 'store':
                         val = oper.args[0]
                     elif oper.name == 'add':
-                        for i in args.keys():
-                            args[i] -= int(oper.args[1])
+                        for i in range(0, len(args)):
+                            args[i] = str(int(args[i]) - int(oper.args[1]))
                         val = oper.args[0]
                     elif oper.name == 'sub':
-                        for i in args.keys():
-                            args[i] += int(oper.args[1])
+                        for i in range(0, len(args)):
+                            args[i] = str(int(args[i]) + int(oper.args[1]))
                         val = oper.args[0]
                     elif oper.name == 'mul':
-                        for i in args.keys():
-                            args[i] /= int(oper.args[0])
+                        for i in range(0, len(args)):
+                            args[i] = str(int(args[i]) / int(oper.args[0]))
                         val = oper.args[1]
                     elif oper.name == 'div':
-                        for i in args.keys():
-                            args[i] *= int(oper.args[0])
+                        for i in range(0, len(args)):
+                            args[i] = str(int(args[i]) * int(oper.args[0]))
                         val = oper.args[1]
                     if is_constant(val):
-                        return args[str(val)]
+                        return op.args[1][orig_args[args.index(val)]]
     except:
         return False
     return False
@@ -207,55 +205,10 @@ def br_two(functions, op):
                     if is_constant(val):
                         if val != num:
                             return op.args[0]
-                        else:
-                            return op.args[1]
+                        return op.args[1]
     except:
         return False
     return False
-    # raise RuntimeError("ERROR while unrolling br with two branches")
-
-def add_l2(source, functions, l2):
-    branch = None
-    for op in l2.operations:
-        functions[-1].labels[-1].operations.append(copy.deepcopy(op))
-        if op.name == 'br' and op.args is None:
-            functions[-1].labels[-1].operations[-1].value = \
-                '%' + get_current_name(reduce_to_value(functions[-1].labels[-1].operations[-1].value), functions[-1])
-            branch = op.value
-            return branch, functions
-        elif op.name == 'br':
-            functions[-1].labels[-1].operations.append(Operation(op.name, op.value,
-                                                        ['%'+get_current_name(reduce_to_value(arg), functions[-1]) for arg in op.args]))
-            branch, functions = unroll_two(source, functions, op)
-    return branch, functions
-
-def add_label(source, functions, l1, l2):
-    branch = None
-    for op in l1.operations:
-        functions[-1].labels[-2].operations.append(copy.deepcopy(op))
-        if op.name == 'br' and op.args is None:
-            functions[-1].labels[-2].operations[-1].value = \
-                '%' + get_current_name(reduce_to_value(functions[-1].labels[-2].operations[-1].value), functions[-1])
-            branch = op.value
-            br2, functions = add_l2(source, functions, l2)
-            if branch == br2:
-                return branch, functions
-            else:
-                pass
-        elif op.name == 'br':
-            functions[-1].labels[-2].operations.append(Operation(op.name, op.value,
-                                                                 [get_current_name(reduce_to_value(arg), functions[-1]) for arg in op.args]))
-            branch, functions = unroll_two(source, functions, op)
-    return branch, functions
-
-
-def unroll_two(source, functions, op):
-    # if not in_function(functions[-1], op.args[0]):
-    functions[-1].labels.append(Label(set_new_name(reduce_to_value(op.args[0]), functions[-1].ssa_map_lbl)))
-    # if not in_function(functions[-1], op.args[1]):
-    functions[-1].labels.append(Label(set_new_name(op.args[1][1:], functions[-1].ssa_map_lbl)))
-    branch, functions = add_label(source, functions, source.label_map[op.args[0][1:]], source.label_map[op.args[1][1:]])
-    return branch, functions
 
 def unroll_label(source, functions, l):
     res = True
@@ -264,22 +217,16 @@ def unroll_label(source, functions, l):
             if op.args is None:
                 res, functions = unroll_label(source, functions, source.label_map[op.value[1:]])
                 return res, functions
-            else:
-                lbl = br_two(functions, op)
-                if not lbl:
-                    # functions[-1].labels[-1].operations.append(copy.deepcopy(op))
-                    return False, functions
-                    # functions[-1].labels[-1].operations.append(Operation(op.name, op.value,
-                    #                                            ['%'+get_current_name(reduce_to_value(arg), functions[-1]) for arg in op.args]))
-                    # branch, functions = unroll_two(source, functions, op)
-                    # functions[-1].labels.append(Label(set_new_name(branch[1:], functions[-1].ssa_map_lbl)))
-                    # functions = unroll_label(source, functions, source.label_map[get_the_real_name(branch[1:])])
-                else:
-                    index_l = functions[-1].labels.index(functions[-1].labels[-1])
-                    index_op = functions[-1].labels[-1].operations.index(functions[-1].labels[-1].operations[-1])
-                    res, functions = unroll_label(source, functions, source.label_map[lbl[1:]])
-                    functions[-1].labels[index_l].operations.pop(index_op)
-                return res, functions
+
+            lbl = br_two(functions, op)
+            if not lbl:
+                return False, functions
+
+            index_l = functions[-1].labels.index(functions[-1].labels[-1])
+            index_op = functions[-1].labels[-1].operations.index(functions[-1].labels[-1].operations[-1])
+            res, functions = unroll_label(source, functions, source.label_map[lbl[1:]])
+            functions[-1].labels[index_l].operations.pop(index_op)
+            return res, functions
         elif op.name == 'ret':
             functions[-1].labels[-1].operations.append(copy.deepcopy(op))
             return res, functions
@@ -295,43 +242,44 @@ def unroll_label(source, functions, l):
             lbl = find_val(functions, op)
             if not lbl:
                 return False, functions
-            else:
-                res, functions = unroll_label(source, functions, source.label_map[lbl[1:]])
-                return res, functions
+
+            res, functions = unroll_label(source, functions, source.label_map[lbl[1:]])
+            return res, functions
         functions[-1].labels[-1].operations.append(copy.deepcopy(op))
 
 def clear_labels(functions):
     for f in functions:
         for lbl in f.labels[::-1]:
-            if len(lbl.operations) == 1 and lbl.operations[0].name == 'br' and lbl.operations[0].args and len(lbl.operations[0].args) == 1:
-                f = rename_label(lbl.name, lbl.operations[0].args[0], f)
-                f.labels.pop(f.labels.index(lbl))
-            elif len(lbl.operations) == 1 and lbl.operations[0].name == 'br' and not lbl.operations[0].args:
-                f = rename_label(lbl.name, lbl.operations[0].value, f)
-                f.labels.pop(f.labels.index(lbl))
+            if len(lbl.operations) == 1 and lbl.operations[0].name == 'br':
+                if lbl.operations[0].args and len(lbl.operations[0].args) == 1:
+                    f = rename_label(lbl.name, lbl.operations[0].args[0], f)
+                    f.labels.pop(f.labels.index(lbl))
+                elif not lbl.operations[0].args:
+                    f = rename_label(lbl.name, lbl.operations[0].value, f)
+                    f.labels.pop(f.labels.index(lbl))
     return functions
 
 def rename_label(old_name, new_name, f):
     for lbl in f.labels:
-        if len(lbl.operations) > 0 and lbl.operations[-1].name == 'br' and lbl.operations[-1].args:
-            for i in range(0, len(lbl.operations[-1].args)):
-                if lbl.operations[-1].args[i] == '%'+old_name:
-                    lbl.operations[-1].args[i] = new_name
-        elif len(lbl.operations) > 0 and lbl.operations[-1].name == 'br':
-            if lbl.operations[-1].value == '%'+old_name:
+        if len(lbl.operations) > 0 and lbl.operations[-1].name == 'br':
+            if lbl.operations[-1].args:
+                for i in range(0, len(lbl.operations[-1].args)):
+                    if lbl.operations[-1].args[i] == '%'+old_name:
+                        lbl.operations[-1].args[i] = new_name
+            elif lbl.operations[-1].value == '%'+old_name:
                 lbl.operations[-1].value = new_name
     return f
 
-def unroll_llvm(fs, known_funcs, progress):
+def unroll_llvm(fs, progress):
     functions = []
     progress.emit("start function identification")
     for f in fs:
         for l in f.labels:
             for op in l.operations:
-                if op.name == 'br' and op.args is not None:
-                    op.value = f.name+'_'+op.value
+                if op.name == 'br':
+                    if op.args is not None:
+                        op.value = f.name+'_'+op.value
                     continue
-                elif op.name == 'br': continue
 
                 if op.value != '':
                     op.value = f.name+'_'+op.value
@@ -389,16 +337,11 @@ def unroll_llvm(fs, known_funcs, progress):
                     if op.args is not None:
                         for i in range(0, len(op.args)):
                             if not is_constant(op.args[i]):
-                                # if get_name_without_func(op.args[i]) in f.params:
-                                #     op.args[i] = get_current_name_var(op.args[i], f)
-                                # else:
                                 op.args[i] = get_prev_name(op.args[i], f.ssa_map_var, f)
-                    # var = get_prev_name(op.value, f.ssa_map_var)
                     op.value = set_new_name(op.value, f.ssa_map_var)
                 elif op.name == 'ret' and len(op.args) > 0 and op.args[0] != '':
                     op.args[0] = get_prev_name(op.args[0], f.ssa_map_var)
-                    # if op.value != var:
-                    #     rename_front_arg(f, var, op.value, l.operations.index(op)+1, f.labels.index(l))
+
     progress.emit("end variable identification")
     print("*******************************************************************")
     
@@ -408,13 +351,14 @@ def unroll_llvm(fs, known_funcs, progress):
 
 
 def parse_llvm(filename, progress):
-    fs, k_fs = load_llvm(filename, progress)
-    fs = unroll_llvm(fs, k_fs, progress)
+    fs = load_llvm(filename, progress)
+    fs = unroll_llvm(fs, progress)
     return fs
 
 if __name__ == "__main__":
     sss = WorkerSignals()
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr_3.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
-    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_aes.ll", sss.progress)
+    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_aes.ll", sss.progress)
+    functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_aes_copy.ll", sss.progress)
     # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna_4.ll", sss.progress)
