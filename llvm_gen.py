@@ -468,8 +468,6 @@ class llvm_Generator(object):
             right = self.builder.icmp_signed('!=', right, ir.Constant(right.type, 0))
             return operations[n.op](left, right)
         elif n.op in comparison_op:
-            # if left.type != right.type and self._is_int(left):
-            #     left = self._trunc_or_sext(right, left)
             return self.builder.icmp_signed(n.op, left, right)
         elif n.op in bit_op:
             if left.type != right.type and self._is_int(left):
@@ -643,13 +641,13 @@ class llvm_Generator(object):
                         self.global_vars[name].initializer = ir.Constant(value, [ir.Constant(self._find_type(x.type), x.value) for x in decl.init.exprs])
                     elif type(m.type) == c_ast.ArrayDecl:
                         continue
-                    elif key[0] == 0:
-                        if name not in self.local_memory.keys():
+                    elif key[0] == 0 and name not in self.local_memory.keys():
                             self.local_memory[name] = self.builder.alloca(value, name=name)
                 elif type(m) == c_ast.PtrDecl:
                     if isinstance(value, ir.VoidType):
                         value = ir.PointerType(ir.IntType(32))
-                    value = ir.PointerType(value)
+                    else:
+                        value = ir.PointerType(value)
                 elif type(m) == c_ast.FuncDecl:
                     paramtypes = []
                     if m.args:
@@ -688,7 +686,7 @@ class llvm_Generator(object):
             return ir.Constant.literal_array(new_array)
         return value
 
-    def visit_Constant(self, n, key=0):
+    def visit_Constant(self, n, key=[0,0]):
         try:
             if n.type == 'char':
                 value = n.value[1:-1].replace('\\n', '\n')
@@ -698,8 +696,7 @@ class llvm_Generator(object):
                 return ir.Constant(ir.ArrayType(ir.IntType(8), len(value)), bytearray(value))
             elif 'long' in n.type:
                 return ir.Constant(ir.IntType(64), n.value)
-            else:
-                return ir.Constant(self.types[n.type], n.value)
+            return ir.Constant(self.types[n.type], n.value)
         except Exception:
             print(f"Unknown constant type: {n.type}")
             self.printW.emit(f"Unknown constant type: {n.type}")
@@ -713,18 +710,26 @@ class llvm_Generator(object):
         elif key[0] == 1:
             return self.builder.load(storage[name])
 
-    def visit_ID(self, n, key=0): 
+    def visit_ID(self, n, key=[0,0]): 
         if n.name in self.function_args:
             return self._get_val_or_pointer(n.name, self.function_args, key)
         elif n.name in self.local_memory:
             return self._get_val_or_pointer(n.name, self.local_memory, key)
         elif n.name in self.global_vars:
-            if key[0] == 0 or key[0] == 1:
-                return self.global_vars[n.name]
+            return self.global_vars[n.name]
         else:
             print(f"Unknown variable: {n.name}")
             self.printW.emit(f"Unknown variable: {n.name}")
             return 'NULL'
+
+    def visit_ArrayDecl(self, n, key=[0,0]):
+        item = None
+        if not isinstance(n.type, c_ast.TypeDecl):
+            item = self.visit(n.type)
+        if item:
+            return ir.ArrayType(item, int(n.dim.value))
+        arr = ir.ArrayType(self._find_type(n.type.type.names[0]), int(n.dim.value))
+        return arr
 
     def _intrinsic_dec_function(self, name, func_type):
         return self.module.declare_intrinsic(name, (), func_type)
@@ -773,12 +778,3 @@ class llvm_Generator(object):
                     elif n.name.name in ( "memcpy", "memmove", "memset", "memcmp", "strlen"):
                         args.append(self.visit(expr))
             return self._intrinsic_dec_function(n.name.name, func_type), args    
-
-    def visit_ArrayDecl(self, n, key=[0,0]):
-        element = None
-        if not isinstance(n.type, c_ast.TypeDecl):
-            element = self.visit(n.type)
-        if element:
-            return ir.ArrayType(element, int(n.dim.value))
-        arr = ir.ArrayType(self._find_type(n.type.type.names[0]), int(n.dim.value))
-        return arr
