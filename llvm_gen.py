@@ -64,8 +64,8 @@ class llvm_Generator(object):
     def generic_visit(self, node, key=[0,0]):
         if isinstance(node, c_ast.EmptyStatement):
             return
-        print("Unknown node: " + node.__class__.__name__)   #!!!
-        self.printW.emit("Unknown node: " + node.__class__.__name__)   #!!!
+        print("Unknown node: " + node.__class__.__name__)
+        self.printW.emit("Unknown node: " + node.__class__.__name__)
 
     def visit_FileAST(self, n, key=[0,0]):
         for ext in n.ext:
@@ -139,20 +139,19 @@ class llvm_Generator(object):
                         self.defined_types[item.type.declname] = self._find_type(item.type.type.names[0])
                         self.struct_type_list[item.type.declname] = n.decls.index(item)
                         types.append(self.defined_types[item.type.declname])
-            typ = ir.global_context.get_identified_type('struct.'+n.name)
-            typ.set_body(*types)
+            str_type = ir.global_context.get_identified_type('struct.'+n.name)
+            str_type.set_body(*types)
         else:
             if 'struct.'+n.name in ir.global_context.identified_types:
                 ir.global_context.identified_types.pop('struct.'+n.name)
                 ir.global_context.scope._useset.remove('struct.'+n.name)
-            typ = ir.global_context.get_identified_type('struct.'+n.name)
+            str_type = ir.global_context.get_identified_type('struct.'+n.name)
             types = [self._find_type(item) for item in n.decls]
-            typ.set_body(*types)
-        return typ
+            str_type.set_body(*types)
+        return str_type
     
     def visit_EnumeratorList(self, n, key=[0,0]):
         arr = {}
-        types = []
         for value in n.enumerators:
             if value.value == None:
                 arr[value.name] = ir.Constant(ir.IntType(32), n.enumerators.index(value))
@@ -168,9 +167,9 @@ class llvm_Generator(object):
         if isinstance(n.type, c_ast.Enum):
             enum = self.visit(n.type.values)
             self.defined_structs[n.declname] = [k for k in enum.keys()]
-            typ = ir.global_context.get_identified_type('struct.'+n.declname)
-            typ.set_body(*enum.values())
-            self.defined_types[n.declname] = typ
+            enum_type = ir.global_context.get_identified_type('struct.'+n.declname)
+            enum_type.set_body(*enum.values())
+            self.defined_types[n.declname] = enum_type
         elif not isinstance(n.type, c_ast.Struct) and (n.declname not in self.defined_types or self.defined_types[n.declname] is None):
             if key[0] == 0:
                 self.defined_types[n.declname] = self._find_type(n.type.names[0])
@@ -179,13 +178,13 @@ class llvm_Generator(object):
             elif key[0] == 2:
                 self.defined_types[n.declname] = ir.PointerType(ir.PointerType(self._find_type(n.type.names[0])))
         elif isinstance(n.type, c_ast.Struct):
-            typ = self._struct_def(n.type, n.declname)
+            str_type = self._struct_def(n.type, n.declname)
             if key[0] == 0:
-                self.defined_types[n.declname] = typ
+                self.defined_types[n.declname] = str_type
             elif key[0] == 1:
-                self.defined_types[n.declname] = ir.PointerType(typ)
+                self.defined_types[n.declname] = ir.PointerType(str_type)
             elif key[0] == 2:
-                self.defined_types[n.declname] = ir.PointerType(ir.PointerType(typ))
+                self.defined_types[n.declname] = ir.PointerType(ir.PointerType(str_type))
         return key
 
     def visit_FuncDef(self, n, key=[0,0]):

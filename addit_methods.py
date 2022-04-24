@@ -88,8 +88,12 @@ def get_name_without_func(name):
 
 
 def save_into_logs(functions, filename):
-    directory = os.getcwd()
-    file = f"{directory}\\logs\\{filename}"
+    directory = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
+    logs_dir = directory+'/logs/'
+    is_path = os.path.exists(logs_dir)
+    if not is_path:
+        os.makedirs(logs_dir)
+    file = f"{logs_dir}/{filename}"
     with open(file, "w") as f:
         for func in functions:
             f.write(func.name)
