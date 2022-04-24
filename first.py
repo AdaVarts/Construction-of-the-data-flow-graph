@@ -25,9 +25,9 @@ def translate_to_c(filename, printW):
         os.makedirs(logs_dir)
     path = f'-I{dir_for_path}/fake_libc_include'
     st = parse_file(filename, use_cpp=True, 
-            cpp_path='gcc', 
-            cpp_args=['-E', r''+path],
-            integer_types=False)
+        cpp_path='gcc', 
+        cpp_args=['-E', r''+path],
+        integer_types=False)
     f = open(f"{logs_dir}/ast_pr.txt", "w")
     st.show(buf = f)
     f.close()
@@ -151,10 +151,6 @@ def convert_C_into_llvm(filename, printW):
 
 if __name__ == "__main__":
     sss = WorkerSignals()
-
-    directory = os.getcwd()
-
-    print(directory)
     
     module = translate_to_c("F:\\STU\\FIIT\\BP\\Present.c", sss.progress)
     module = translate_to_c("F:\\STU\\FIIT\\BP\\kalyna.c", sss.progress)
@@ -210,7 +206,7 @@ if __name__ == "__main__":
     # path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
     # for i, n in path.items():
     #     print(n)
-    print("end")
+    # print("end")
     # for f in functions:
     #     if f.name == 'encrypt':
     #         start_DFG(f)

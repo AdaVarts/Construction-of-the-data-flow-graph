@@ -489,7 +489,7 @@ class Ui_ConstructorWindow(object):
         x = 0
         for node in nodes[::-1]:
             key = node[0]
-            print(str(key)+"  "+node.__str__())
+            # print(str(key)+"  "+node.__str__())
             self.tableWidget.setRowCount(x+2)
             item = QtWidgets.QTableWidgetItem()
             self.tableWidget.setVerticalHeaderItem(x, item)

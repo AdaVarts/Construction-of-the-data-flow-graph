@@ -75,9 +75,6 @@ class MainWin(QtWidgets.QMainWindow):
     def open_constructW(self, fs):
         self.ui = Ui_ConstructorWindow()
         self.ui.setupUi(self, fs)
-        # self.ui.butAdd.clicked.connect(self.clicked_add_product)
-        # self.ui.tableWidget.itemDoubleClicked.connect(self.clicked_open_product)
-        # self.ui.butHome.clicked.connect(self.open_main)
         self.ui.actionBack.triggered.connect(self.open_main)
 
 

@@ -138,7 +138,7 @@ def load_llvm(filename, progress):
     progress.emit("end memory management")
 
     save_into_logs(functions, "output_llvm.txt")
-    print('-----')
+    # print('-----')
     for func in known_funcs:
         print(func)
     
@@ -343,7 +343,7 @@ def unroll_llvm(fs, progress):
                     op.args[0] = get_prev_name(op.args[0], f.ssa_map_var)
 
     progress.emit("end variable identification")
-    print("*******************************************************************")
+    # print("*******************************************************************")
     
     save_into_logs(functions, "output_unroll.txt")
 
