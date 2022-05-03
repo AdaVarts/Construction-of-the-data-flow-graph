@@ -1,6 +1,6 @@
 # Construction of the data flow graph
 
-The tool is a result of bachelor project.
+The tool is a result of bachelor project. It is designed to simplify the process of inspection the symmetric block cipers implementation written in C within security analysis against DFA (Differential Fault Analysis). 
 
 ## How to start
 
