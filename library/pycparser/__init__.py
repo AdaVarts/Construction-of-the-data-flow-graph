@@ -13,7 +13,7 @@ __version__ = '2.20'
 import io
 from subprocess import check_output
 from .c_parser import CParser
-import os
+import os, sys
 
 
 def preprocess_file(filename, cpp_path='cpp', cpp_args=''):
@@ -193,20 +193,23 @@ def parse_file(filename, use_cpp=False, cpp_path='cpp', cpp_args='',
 
         Errors from cpp will be printed out.
     """
+    if getattr(sys, 'frozen', False):
+        directory = os.path.dirname(sys.executable)
+    else:
+        directory = os.path.dirname(os.path.abspath(__file__))
+    directory = directory.replace('\\','/')
+    logs_dir = directory+'/logs/'
+    is_path = os.path.exists(logs_dir)
+    if not is_path:
+        os.makedirs(logs_dir)
+
     if use_cpp:
         text = preprocess_file(filename, cpp_path, cpp_args)
         if integer_types: text2 = preprocess_file(filename, cpp_path, cpp_args = ['-E'])
     else:
         with io.open(filename) as f:
             text = f.read()
-
-    directory = os.path.dirname(os.path.abspath(__file__))
-    dir_for_path = directory.replace('\\','/')
-    logs_dir = dir_for_path+'/logs/'
-    is_path = os.path.exists(logs_dir)
-    if not is_path:
-        os.makedirs(logs_dir)
-
+    
     text = remove_annotation(text)
     if integer_types:
         text2 = remove_annotation(text2)

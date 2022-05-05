@@ -1,5 +1,5 @@
 from llvmlite import ir
-import pycparser.c_ast as c_ast
+import library.pycparser.c_ast as c_ast
 
 # Main class of llvm generator
 class llvm_Generator(object):

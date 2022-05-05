@@ -1,4 +1,4 @@
-import os
+import os, sys
 
 # Get name without delimiters
 def get_name(name):
@@ -96,7 +96,11 @@ def get_name_without_func(name):
 
 # Save the intermediate form in the .txt file for logs
 def save_into_logs(functions, filename):
-    directory = os.path.dirname(os.path.abspath(__file__)).replace('\\','/')
+    if getattr(sys, 'frozen', False):
+        directory = os.path.dirname(sys.executable)
+    else:
+        directory = os.path.dirname(os.path.abspath(__file__))
+    directory = directory.replace('\\','/')
     logs_dir = directory+'/logs/'
     is_path = os.path.exists(logs_dir)
     if not is_path:

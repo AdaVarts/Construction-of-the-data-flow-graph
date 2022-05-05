@@ -1,13 +1,17 @@
 import time
 from addit_methods import is_constant
-from pycparser import parse_file
+from library.pycparser import parse_file
 import llvm_gen 
-import os
+import os, sys
 from classes import DFG, Edge, Node, WorkerSignals
 
 # Preprocess C file with gcc and convert it to LLVM 
 def translate_to_c(filename, printW):
-    directory = os.path.dirname(os.path.abspath(__file__))
+    if getattr(sys, 'frozen', False):
+        directory = os.path.dirname(sys.executable)
+    else:
+        directory = os.path.dirname(os.path.abspath(__file__))
+
     dir_for_path = directory.replace('\\','/')
     logs_dir = dir_for_path+'/logs/'
     is_path = os.path.exists(logs_dir)
