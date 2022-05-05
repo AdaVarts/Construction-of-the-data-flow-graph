@@ -79,7 +79,7 @@ class DFG:
 
 
 from PyQt5.QtCore import *
-
+# Worker class with signals to run a thread from GUI and report a progress
 class WorkerSignals(QObject):
     finished = pyqtSignal()
     result = pyqtSignal(object)

@@ -1,7 +1,7 @@
 from llvmlite import ir
 import pycparser.c_ast as c_ast
 
-
+# Main class of llvm generator
 class llvm_Generator(object):
     def __init__(self, printW):
         self.module = ir.Module(name=__file__)
@@ -9,6 +9,7 @@ class llvm_Generator(object):
         ir.global_context.identified_types = {}
         ir.global_context.scope._useset = {''}
 
+        # memory
         self.global_vars = {}
         self.defined_types = {}
         self.defined_structs = {}
@@ -19,10 +20,10 @@ class llvm_Generator(object):
         self.local_memory = {}
         self.blocks_for_continue = []
         self.blocks_for_break = []
-        # self.cur_block = None
 
         self.printW = printW
 
+        # Types maps
         self.types = {
             'char': ir.IntType(8),
             'short': ir.IntType(16),
@@ -78,19 +79,22 @@ class llvm_Generator(object):
             elif isinstance(ext, c_ast.Typedef):
                 self.visit(ext, key=[1,0])
 
-
+    # Type definition
     def visit_Typedef(self, n, key=[0,0]):
         if isinstance(n.type, c_ast.TypeDecl):
             self.visit(n.type)
 
+    # Pointer definition
     def visit_PtrDecl(self, n, key=[0,0]):
         if key[1] != 0:
             return ir.PointerType(self.visit(n.type, key))
         return self.visit(n.type, key=[key[0]+1,0])
 
+    # Type identification
     def visit_IdentifierType(self, n, key=[0,0]):
         return self._find_type(n.names[0])
     
+    # Find the type in created memory (basic, new type, struct)
     def _find_type(self, n):
         if n in self.types.keys():
             return self.types[n]
@@ -100,12 +104,16 @@ class llvm_Generator(object):
             return ir.global_context.get_identified_type('struct.'+n)
         else: return None
     
+    # Declaration list
     def visit_DeclList(self, n, key=[0,0]):
         if n.decls:
             for decl in n.decls:
                 self.visit(decl, key=[0,0])
         return 
 
+    # Struct definition
+    #  if doesn't exist - add new
+    #  if exists - get from memory
     def _struct_def(self, n, name):
         if n.decls == None:
             return None
@@ -115,6 +123,9 @@ class llvm_Generator(object):
             types = []
             for item in n.decls:
                 if item.name not in self.defined_types:
+                    # Item is an rray:
+                    #  if element is a value - create an array
+                    #  if array is multidimensional - go inside
                     if type(item.type) == c_ast.ArrayDecl:
                         if isinstance(item.type.type.type, c_ast.Struct):
                             if not item.type.type.type.name: item.type.type.type.name = item.type.type.declname
@@ -150,6 +161,7 @@ class llvm_Generator(object):
             str_type.set_body(*types)
         return str_type
     
+    # Enum
     def visit_EnumeratorList(self, n, key=[0,0]):
         arr = {}
         for value in n.enumerators:
@@ -161,6 +173,7 @@ class llvm_Generator(object):
             self.defined_types[value.name] = arr[value.name]
         return arr
 
+    # Type declaration for enum, struct, pointer, and all others
     def visit_TypeDecl(self, n, key=[0,0]):
         if key[1] != 0:
             return self.visit(n.type, key)
@@ -187,6 +200,13 @@ class llvm_Generator(object):
                 self.defined_types[n.declname] = ir.PointerType(ir.PointerType(str_type))
         return key
 
+    ###
+    # New function definition:
+    #  clear the memory: args, local memory, blocks for 'continue', 'break' jumps
+    #  go through the compound structures in the function
+    #  define the return value
+    #  clear the memory
+    ###
     def visit_FuncDef(self, n, key=[0,0]):
         self.cur_function = self.visit(n.decl, key=[2,0])
         self.function_args.clear()
@@ -210,6 +230,15 @@ class llvm_Generator(object):
         self.function_args.clear()
         self.cur_block = None
 
+    ###
+    # For loop:
+    #  has an init - precondition
+    #  set the 4 blocks
+    #  additional operations in case of '--' and '++' in main condition
+    #  cond - go through main condition
+    #  stmt - the main operations of loop
+    #  next - go through post round operations
+    ###
     def visit_For(self, n, key=[1,0]):
         if n.init:
             self.visit(n.init)
@@ -249,6 +278,12 @@ class llvm_Generator(object):
         self.blocks_for_continue.pop()
         self.blocks_for_break.pop()
     
+    ###
+    # While loop:
+    #  set the 3 blocks
+    #  cond - go through main condition
+    #  stmt - the main operations of loop
+    ###
     def visit_While(self, n, key=[1,0]):
         while_cond = self.cur_function.append_basic_block("while_cond")
         while_loop = self.cur_function.append_basic_block("while_loop")
@@ -267,6 +302,12 @@ class llvm_Generator(object):
         self.blocks_for_continue.pop()
         self.blocks_for_break.pop()
     
+    ###
+    # DoWhile loop:
+    #  set the 3 blocks
+    #  stmt - the main operations of loop
+    #  cond - go through main condition
+    ###
     def visit_DoWhile(self, n, key=[1,0]):
         dowhile_loop = self.cur_function.append_basic_block("dowhile_loop")
         dowhile_cond = self.cur_function.append_basic_block("dowhile_cond")
@@ -285,19 +326,29 @@ class llvm_Generator(object):
         self.blocks_for_continue.pop()
         self.blocks_for_break.pop()
     
+    # In case result of condition is not bool
     def _correct_cond(self, cond):
         if cond.type is not ir.IntType(1):
             cond = self.builder.icmp_signed('!=', cond, ir.Constant(cond.type, 0))
         return cond
     
+    # Break - jump to the previous block for breaks
     def visit_Break(self, n, key=[0,0]):
         block = self.blocks_for_break[-1]
         self.builder.branch(block)
     
+    # Continue - jump to the previous block for continue
     def visit_Continue(self, n, key=[0,0]):
         block = self.blocks_for_continue[-1]
         self.builder.branch(block)
     
+    ###
+    # Switch:
+    #  has 2 blocks
+    #  firstly sets default
+    #  then all other cases
+    #  cases are set in reverse order (in case there is no jump from the case, program should go through all of them)
+    ###
     def visit_Switch(self, n, key=[0,0]):
         if n.stmt.block_items:
             switch_begin = self.cur_function.append_basic_block("switch_begin")
@@ -322,6 +373,11 @@ class llvm_Generator(object):
             while len(self.blocks_for_continue) > con_blocks:
                 self.blocks_for_continue.pop()
     
+    ###
+    # Case of switch:
+    #  make another block for operations
+    #  if there is no Break Continue Return -> proceed with the next case block
+    ###
     def visit_Case(self, n, key=[0,0]):
         switch_case = self.cur_function.append_basic_block()
         self.builder.position_at_end(switch_case)
@@ -337,6 +393,7 @@ class llvm_Generator(object):
         self.blocks_for_continue.append(switch_case)
         return switch_case
 
+    # Default is done the same way as Case
     def visit_Default(self, n, key=[0,0]):
         switch_default = self.cur_function.append_basic_block("switch_default")
         self.builder.position_at_end(switch_default)
@@ -351,6 +408,7 @@ class llvm_Generator(object):
             self.builder.branch(block)
         return switch_default
 
+    # Compound (usually in function body)
     def visit_Compound(self, n, key=[0,0]):
         ret = False
         if n.block_items:
@@ -360,6 +418,7 @@ class llvm_Generator(object):
                     ret = True
         return ret
 
+    # Assignment operations with '='
     def visit_Assignment(self, n, key=[0,0]):
         left = self.visit(n.lvalue, key=[0,0])
         right = self.visit(n.rvalue, key=[1,0])
@@ -403,6 +462,7 @@ class llvm_Generator(object):
                 print(f"Unknown assignment operator: {n.op}")
                 self.printW.emit(f"Unknown assignment operator: {n.op}")
 
+    # Struct reference
     def visit_StructRef(self, n, key=[0,0]):
         if n.type == '.' or n.type == '->':
             ind = self.struct_type_list[n.field.name]
@@ -418,9 +478,11 @@ class llvm_Generator(object):
             elif key[0] == 1:
                 return self.builder.bitcast(value, v_type)
     
+    # Get the type
     def visit_Typename(self, n, key=[0,0]):
         return self.visit(n.type, key)
 
+    # Operation with 2 operands
     def visit_BinaryOp(self, n, key=[0,0]):
         left = self.visit(n.left, key)
         right = self.visit(n.right, key=[1,0])
@@ -476,6 +538,7 @@ class llvm_Generator(object):
             print(f"Unknown binary operator: {n.op}")
             self.printW.emit(f"Unknown binary operator: {n.op}")
 
+    # Cast in case the types are not equal
     def visit_Cast(self, n, key=[0,0]):
         value = self.visit(n.expr, [1,0])
         to_type = self.visit(n.to_type, key=[0,1])
@@ -487,6 +550,7 @@ class llvm_Generator(object):
         else:
             return value
 
+    # Condition if-then and if-then-else-then with ? :
     def visit_TernaryOp(self, n, key=[1,0]):
         cond = self.visit(n.cond, key=[1,0])
         with self.builder.if_else(cond) as (then, otherwise):
@@ -501,6 +565,7 @@ class llvm_Generator(object):
         ret_value.add_incoming(iffalse_v, elblock)
         return ret_value
 
+    # Operation with 1 operand
     def visit_UnaryOp(self, n, key=[1,0]):
         expr = self.visit(n.expr, key)
         if n.op in ('p++', '++'):
@@ -525,6 +590,8 @@ class llvm_Generator(object):
             print(f"Unknown unary operator: {n.op}")
             self.printW.emit(f"Unknown unary operator: {n.op}")
 
+    # Reference of array:
+    # special cases with multidimensional arrays, arrays with structs 
     def visit_ArrayRef(self, n, key=[0,0]):
         arr = self.visit(n.name)
         index = self.visit(n.subscript, [1,0])
@@ -549,6 +616,7 @@ class llvm_Generator(object):
             except Exception:
                 return self.builder.load(item)
 
+    # Condition if-then and if-then-else-then
     def visit_If(self, n, key=[0,0]):
         cond = self.visit(n.cond, key=[1,0])
         cond = self._correct_cond(cond)
@@ -562,6 +630,7 @@ class llvm_Generator(object):
             with self.builder.if_then(cond):
                 self.visit(n.iftrue)
 
+    # Declaration in general (usually variables global/local, can be with specific types)
     def visit_Decl(self, n, key=[0,0]):
         if n.init:
             if key[0] == 0:
@@ -580,6 +649,8 @@ class llvm_Generator(object):
         if key[0] == 2:
             return declaration
 
+    # Instance of function call
+    #  if function is not known (functions from libraries) -> can be added manually for the ones that are implemented
     def visit_FuncCall(self, n, key=[0,0]):
         if n.name.name in self.defined_functions.keys():
             function = self.defined_functions[n.name.name]
@@ -597,6 +668,8 @@ class llvm_Generator(object):
         
         return self.builder.call(function, args)
 
+    # Return - should be always present:
+    #  if there is no return -> return void
     def visit_Return(self, n, key=[0,0]):
         if n.expr:
             ret = self.visit(n.expr, key=[1,0])
@@ -604,6 +677,8 @@ class llvm_Generator(object):
         else:
             self.builder.ret_void()
     
+    # Special casting: to pointers or expand/truncate memory
+    #  by default - bitcast
     def _cast(self, arg, to_arg):
         try:
             if arg.type.pointee == to_arg.type:
@@ -621,6 +696,20 @@ class llvm_Generator(object):
                     arg = self.builder.bitcast(arg, to_arg.type)
         return arg
 
+    ###
+    # Type creation:
+    #  go to the depth to find the first identification (algorithm from pycparser c_generator.py)
+    #  special case - array: 
+    #       with/without initial values; 
+    #       with/without set size (by default 256); 
+    #       multidimensional;
+    #  special case - pointer:
+    #       pointer of value; 
+    #       pointer of void -> set pointer of integer (llvmbuilder does not accept pointer of void);
+    #  special case - function:
+    #       set args types;
+    #       create a function type;
+    ###
     def _create_type(self, n, key=[0,0], modifiers=[]):
         if type(n) == c_ast.IdentifierType:
             value = self._find_type(n.names[0])
@@ -671,6 +760,8 @@ class llvm_Generator(object):
         elif type(n) in (c_ast.ArrayDecl, c_ast.FuncDecl, c_ast.TypeDecl, c_ast.PtrDecl, c_ast.Decl):
             return self._create_type(n.type, key, modifiers+[n])
 
+    # Set initial values of list
+    #  special case - string
     def visit_InitList(self, n, key=[0,0]):
         new_array = []
         for item in n.exprs:
@@ -685,6 +776,7 @@ class llvm_Generator(object):
             return ir.Constant.literal_array(new_array)
         return value
 
+    # Constant values
     def visit_Constant(self, n, key=[0,0]):
         try:
             if n.type == 'char':
@@ -703,12 +795,14 @@ class llvm_Generator(object):
     def visit_ExprList(self, n, key=[0,0]):
         return [self.visit(item, key) for item in n.exprs]
 
+    # Get value or a pointer to a value
     def _get_val_or_pointer(self, name, storage, key):
         if key[0] == 0:
             return storage[name]
         elif key[0] == 1:
             return self.builder.load(storage[name])
 
+    # Identification of variable - gets the variable fron memory (function args, local, global)
     def visit_ID(self, n, key=[0,0]): 
         if n.name in self.function_args:
             return self._get_val_or_pointer(n.name, self.function_args, key)
@@ -721,6 +815,7 @@ class llvm_Generator(object):
             self.printW.emit(f"Unknown variable: {n.name}")
             return 'NULL'
 
+    # Array declaration
     def visit_ArrayDecl(self, n, key=[0,0]):
         item = None
         if not isinstance(n.type, c_ast.TypeDecl):
@@ -747,6 +842,7 @@ class llvm_Generator(object):
         elif self._int_type(left) < self._int_type(right):
             return self.builder.trunc(right, left.type)
 
+    # Add a function of library manually (with/without args)
     def _add_function(self, n):
         function_names_not_needed = {"sprintf", "fprintf", "printf", "puts", "gets", "perror"}
         func_type = None

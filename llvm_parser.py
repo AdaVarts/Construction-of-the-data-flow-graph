@@ -5,6 +5,7 @@ from addit_methods import *
 # import sys
 # sys.setrecursionlimit(3000)
 
+# Load LLVM from file, parse evey line, get the needed variables and values
 def load_llvm(filename, progress):
     functions = []
     known_funcs = []
@@ -134,17 +135,17 @@ def load_llvm(filename, progress):
 
     save_into_logs(functions, "parsed_llvm.txt")
 
+    # Eliminate redundant operations
     functions = memory_manag(functions)
     progress.emit("end memory management")
 
     save_into_logs(functions, "output_llvm.txt")
-    # print('-----')
     for func in known_funcs:
         print(func)
     
     return functions
 
-
+# Switch backtrace value to decide what label to unroll
 def find_val(functions, op):
     val = op.value
     orig_args = list(op.args[1].keys())
@@ -177,6 +178,7 @@ def find_val(functions, op):
         return False
     return False
 
+# Backtrace the condition of jump to decide what label to unroll
 def br_two(functions, op):
     val = op.value
     num = None
@@ -210,6 +212,13 @@ def br_two(functions, op):
         return False
     return False
 
+###
+# Unroll label:
+#  copy all operations till jumps
+#  decide if jump is unrollable
+#    return the same function
+#    or unroll the right labels
+###
 def unroll_label(source, functions, l):
     res = True
     for op in l.operations:
@@ -247,6 +256,7 @@ def unroll_label(source, functions, l):
             return res, functions
         functions[-1].labels[-1].operations.append(copy.deepcopy(op))
 
+# If in label is just 1 operation - jump to another label -> eliminate such label
 def clear_labels(functions):
     for f in functions:
         for lbl in f.labels[::-1]:
@@ -259,6 +269,7 @@ def clear_labels(functions):
                     f.labels.pop(f.labels.index(lbl))
     return functions
 
+# Rename the label jumps
 def rename_label(old_name, new_name, f):
     for lbl in f.labels:
         if len(lbl.operations) > 0 and lbl.operations[-1].name == 'br':
@@ -270,6 +281,13 @@ def rename_label(old_name, new_name, f):
                 lbl.operations[-1].value = new_name
     return f
 
+###
+# Main unroll:
+#  identify variables by function names
+#  eliminate redundant labels
+#  unroll labels
+#  set variables into SSA form
+###
 def unroll_llvm(fs, progress):
     functions = []
     progress.emit("start function identification")
@@ -323,13 +341,14 @@ def unroll_llvm(fs, progress):
 
     save_into_logs(functions, "output_unroll_before_ssa.txt")
 
-    
+    # SSA: firstle set the params
     progress.emit("start variable identification")
     for f in functions:
         for param in f.params:
             if param == '': continue
             if not is_overwritten(f, f.name+'_'+param, 0, 0) and f.name+'_'+param in f.ssa_map_var.keys():
                 f.ssa_map_var[f.name+'_'+param] += 1
+    # SSA: then go through every variable
     for f in functions:
         for l in f.labels:
             for op in l.operations:
@@ -349,7 +368,7 @@ def unroll_llvm(fs, progress):
 
     return functions
 
-
+# Parse and customize LLVM
 def parse_llvm(filename, progress):
     fs = load_llvm(filename, progress)
     fs = unroll_llvm(fs, progress)

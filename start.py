@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from constructor import Ui_ConstructorWindow
 from llvm_parser import parse_llvm
 from startingWindowGUI import Ui_MainWindow
-from first import convert_C_into_llvm
+from convert_and_dfgBuild import convert_C_into_llvm
 from classes import Worker
 
 class MainWin(QtWidgets.QMainWindow):
@@ -15,6 +15,7 @@ class MainWin(QtWidgets.QMainWindow):
         self.open_main()
         self.threadpool = QThreadPool()
     
+    # Open main window
     def open_main(self):    
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
@@ -23,18 +24,21 @@ class MainWin(QtWidgets.QMainWindow):
         self.ui.btnConvInLlvm.clicked.connect(self.clicked_convert_into_llvm)
         self.ui.btnBuildDFG.clicked.connect(self.clicked_build_module)
 
+    # Open dialog window to choose C file
     def clicked_choose_c_file(self):
         fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","C Files (*.c)")
         if fileName:
             self.ui.btnConvInLlvm.setEnabled(True)
             self.ui.linePathForC.setText(fileName)
     
+    # Open dialog window to choose LLVM file
     def clicked_choose_llvm_file(self):
         fileName, _ = QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", "","LLVM Files (*.ll)")
         if fileName:
             self.ui.btnBuildDFG.setEnabled(True)
             self.ui.linePathForLlvm.setText(fileName)
 
+    # Convert C into LLVM
     def clicked_convert_into_llvm(self):
         self.ui.btnConvInLlvm.setEnabled(False)
         self.ui.btnChooseC.setEnabled(False)
@@ -45,6 +49,7 @@ class MainWin(QtWidgets.QMainWindow):
         worker.signals.progress.connect(self.reportProgress)
         self.threadpool.start(worker)
 
+    # Save converted file as .ll (LLVM file)
     def save(self, result):
         if result:
             fileName, _ = QFileDialog.getSaveFileName(self, 'Save File', "","LLVM Files (*.ll)")
@@ -61,7 +66,7 @@ class MainWin(QtWidgets.QMainWindow):
     def reportProgress(self, s):
         self.ui.textPrint.append(s)
 
-    
+    # Load LLVM and customize data
     def clicked_build_module(self):
         self.ui.btnConvInLlvm.setEnabled(False)
         self.ui.btnChooseC.setEnabled(False)
@@ -72,6 +77,7 @@ class MainWin(QtWidgets.QMainWindow):
         worker.signals.progress.connect(self.reportProgress)
         self.threadpool.start(worker)
     
+    # Open second window
     def open_constructW(self, fs):
         self.ui = Ui_ConstructorWindow()
         self.ui.setupUi(self, fs)

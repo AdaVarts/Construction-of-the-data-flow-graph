@@ -78,6 +78,7 @@ def preprocess_file(filename, cpp_path='cpp', cpp_args=''):
 #         text2 += line + "\n"
 #     return text2
 
+# For other int types
 def compare_replace(text, text2):
     source = text2.split('\n')
     source_list = {}
@@ -111,6 +112,7 @@ def compare_replace(text, text2):
         text_ret += line + '\n'
     return text_ret
 
+# Remove annotations created by gcc
 def remove_annotation(text):
 
     UNNESS = ["__ext", "__dl", "bute__((__cd", "__att", "__res", "__unu",  "__nothrow__", "extern", "signed", "__inline__"]

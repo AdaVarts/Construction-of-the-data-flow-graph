@@ -1,21 +1,11 @@
-# from msilib.schema import Error
-# import llvmlite
-# import copy
-# import typing
 import time
 from addit_methods import is_constant
-from function_manag import get_ret_values, merge_in_one, merge_two_funcs
-from llvm_parser import parse_llvm
-from pycparser import parse_file#, preprocess_file
-# import pyparsing as pp
-# from llvmlite import ir
-# from llvmlite import binding
+from pycparser import parse_file
 import llvm_gen 
 import os
-# import io
-# import ast
 from classes import DFG, Edge, Node, WorkerSignals
 
+# Preprocess C file with gcc and convert it to LLVM 
 def translate_to_c(filename, printW):
     directory = os.path.dirname(os.path.abspath(__file__))
     dir_for_path = directory.replace('\\','/')
@@ -41,6 +31,7 @@ def get_function(module, name_f):
         if f.name == name_f:
             return f
 
+# Save one node into DFG
 def save_node(dfg, name):
     node = dfg.get_node(name)
     if node is None:
@@ -48,6 +39,7 @@ def save_node(dfg, name):
         dfg.nodes[node.name] = node
     return dfg, node
 
+# Save an edge into DFG
 def save_one_tail(index, dfg, op):
     dfg, node = save_node(dfg, op.value)
     try:
@@ -61,17 +53,20 @@ def save_one_tail(index, dfg, op):
     dfg.edges.append(edge)   
     return dfg
 
+# Save two edges to one node into DFG
 def save_two_tails(dfg, op):
     dfg = save_one_tail(0, dfg, op)
     dfg = save_one_tail(1, dfg, op)
     return dfg
 
+# Save three edges to one node into DFG
 def save_three_tails(dfg, op):
     dfg = save_one_tail(0, dfg, op)
     dfg = save_one_tail(1, dfg, op)
     dfg = save_one_tail(2, dfg, op)
     return dfg
 
+# Create dfg if it doesn't exist and search for the nodes and paths
 def start_DFG(dfg_def, function, distance, ret_value, progress):
     start_time=time.time()
     if dfg_def == None:
@@ -95,6 +90,8 @@ def start_DFG(dfg_def, function, distance, ret_value, progress):
     progress.emit(f"Delay: {delay}")
     return dfg_def
 
+# Search for the nodes at entered distance with DFS and 
+#  store them with their paths from a returning value
 def dfs(node, k, distance, path, map_path):
     for edge in node.incoming:
         if k+1 == distance:
@@ -112,6 +109,7 @@ def dfs(node, k, distance, path, map_path):
         dfs(edge.tail, k+1, distance, path, map_path)
         path.pop()
 
+# Construct a DFG from the final function
 def create_dfg(function, progress):
     dfg = DFG()
     progress.emit("Data Flow Graph: starting to build")
@@ -139,7 +137,7 @@ def create_dfg(function, progress):
     progress.emit("Data Flow Graph: was built")
     return dfg
 
-
+# Trigger the C into LLVM converting process
 def convert_C_into_llvm(filename, printW):
     try:
         module = translate_to_c(filename, printW)
@@ -161,52 +159,4 @@ if __name__ == "__main__":
     module = translate_to_c("F:\\STU\\FIIT\\BP\\blowfish.c", sss.progress)
     module = translate_to_c("F:\\STU\\FIIT\\BP\\md5.c", sss.progress)
     module = translate_to_c("F:\\STU\\FIIT\\BP\\rot-13.c", sss.progress)
-    # translate_to_c("F:\\STU\\FIIT\\BP\\tests\\PR.c")
 
-    # m = module.__str__()
-    # llvm_ir_parsed = binding.parse_assembly(str(module))
-    # llvm_ir_parsed.verify()
-
-    # f1 = open("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_2.ll", "w")
-    # f1.write(m)
-    # f1.close()
-    # print(m)
-
-
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_kalyna.ll", sss.progress)
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\pr.ll", sss.progress)
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_pr.ll", sss.progress)
-    # functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_md2.ll", sss.progress)
-    # try:
-    #     functions = parse_llvm("F:\\STU\\FIIT\\BP\\llvm_ir_blowfish_3.ll", sss.progress)
-    # except:
-    #     print("some error")
-    # func = merge_in_one(functions, 'encrypt', [], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
-    # func = merge_in_one(functions, 'encrypt', ['Sbox'], ['fromHexStringToBytes', 'fromBytesToLong', 'fromHexStringToLong', 'fromLongToBytes', 'fromLongToHexString'], sss.progress)
-    # func = merge_in_one(functions, 'blowfish_key_setup', ['loop'], [], sss.progress)
-    # func = merge_in_one(functions, 'blowfish_encrypt', [], [], sss.progress)
-    # func = merge_in_one(functions, 'md2_init', [], [], sss.progress)
-    
-    # merge_two_funcs(encrypt_f, sbox_f, sss.progress)
-    # get_ret_values(func, sss.progress)
-    # dfg = create_dfg(func, sss.progress)
-    # num = 0
-    # for key in dfg.nodes.keys():
-    #     if 'blowfish_encrypt' not in key:
-    #         print(key)
-    #         num += 1
-    # print("*******")
-    # print(num)
-    # start_DFG(dfg, func, 2, f'md2_init_%ctx-64', sss.progress)
-    # start_DFG(dfg, func, 2, f'md2_init_%ctx.1-64', sss.progress)
-    # start_DFG(dfg, func, 3, f'blowfish_key_setup_%keystruct.1-3', sss.progress)
-    # start_DFG(dfg, func, 6, f'encrypt_%state-63', sss.progress)
-    # start_DFG(dfg, func, 7, f'encrypt_%state-63', sss.progress)
-    # start_DFG(dfg, func, 9, f'encrypt_%state-63', sss.progress)
-    # path = get_path(dfg, 7, '1', f'encrypt_%state-63', 2, sss.progress)
-    # for i, n in path.items():
-    #     print(n)
-    # print("end")
-    # for f in functions:
-    #     if f.name == 'encrypt':
-    #         start_DFG(f)

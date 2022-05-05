@@ -1,9 +1,9 @@
 import copy
 from addit_methods import is_constant, save_into_logs
 from classes import Function
-
 from memory_management import rename_front_arg
 
+# Get the returning variables if there is no 'ret existing_variable'
 def get_ret_values(function, progress):
     res = []
     for param in function.params:
@@ -22,6 +22,7 @@ def get_ret_values(function, progress):
         progress.emit(f"Error: no changed value to return was found")
     return res
 
+# Merge chosen functions into main one and delete the marked ones
 def merge_in_one(fs, name, addsf, delsf, progress):
     for f in fs:
         if f.name == name:
@@ -51,6 +52,7 @@ def merge_in_one(fs, name, addsf, delsf, progress):
             start_f.params.pop(start_f.params.index(param))
     return start_f
 
+# Delete an instance(call) of a function from the main one
 def delete_f(dest: Function, source: Function, progress):
     if len(source.params) > 1:
         progress.emit(f"Error: deleting function {source.name} is not possible!")
@@ -65,6 +67,7 @@ def delete_f(dest: Function, source: Function, progress):
     
     save_into_logs([dest], "dell_func.txt")
 
+# Merge one function into the instances of the main one
 def merge_two_funcs(dest: Function, source: Function, progress):
     if len(source.labels) > 1:
         progress.emit("Error: The targeted function has more than 1 label")
@@ -74,6 +77,8 @@ def merge_two_funcs(dest: Function, source: Function, progress):
 
         save_into_logs([dest], f"{dest.name}.txt")
 
+# Merging 2 functions: 
+#  Substitute the arguments and returning value of the function that is going to be merged into the main one 
 def substitute(dest:Function, source: Function, l_i, op_i, counter_f, progress):
     op = op_i
     while op < len(dest.labels[l_i].operations)-1:
@@ -106,6 +111,8 @@ def substitute(dest:Function, source: Function, l_i, op_i, counter_f, progress):
             if out:
                 break
 
+# Merging 2 functions: 
+#  Add the operations in the main function in SSA
 def put_func(dest, lbl_i, op_i, src, counter_f, progress):
     dest.labels[lbl_i].operations.pop(op_i)
     for op in src.labels[0].operations:

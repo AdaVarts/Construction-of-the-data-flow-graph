@@ -1,14 +1,17 @@
 from addit_methods import save_into_logs
 from classes import Operation
 
+# Eliminate redundant operations from LLVM
 def memory_manag(fs):
     val = None
+    # Not neede function calls
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
                 if op.name in ['printf', 'sprintf', 'free', 'puts']:
                     l.operations.pop(l.operations.index(op))
 
+    # Bitcasting
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -18,6 +21,7 @@ def memory_manag(fs):
                     print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                     l.operations.pop(l.operations.index(op))
 
+    # Casting memory size
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -26,6 +30,8 @@ def memory_manag(fs):
                     print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                     l.operations.pop(l.operations.index(op))
 
+    # Store when the value is not used after
+    # or if the argument is in args of function
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -41,6 +47,7 @@ def memory_manag(fs):
                         print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                         l.operations.pop(l.operations.index(op))
 
+    # Delete all loads
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -50,6 +57,7 @@ def memory_manag(fs):
                     print(f.name+'  : '+l.name+'  -  '+op.name+' '+op.value+'  '+str(op.args))
                     l.operations.pop(l.operations.index(op))
 
+    # Store - when the value is overwritten
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -61,6 +69,7 @@ def memory_manag(fs):
 
     save_into_logs(fs, "output_mem_man_before_store.txt")
 
+    # Store when arg is not from array and value is not used after
     for f in fs:
         for l in f.labels:
             for op in l.operations[::-1]:
@@ -87,6 +96,7 @@ def memory_manag(fs):
 
     return fs
 
+# Store into every array, from which the arg came from
 def store_into_arr_check(f, l, op):
     new_val = is_arr(f, op.value, l.operations.index(op)-1, f.labels.index(l))
     if op.name in ('memcpy', 'memmove', 'store') and new_val:
@@ -95,6 +105,7 @@ def store_into_arr_check(f, l, op):
         f = store_into_arr_check(f, l, l.operations[l.operations.index(op)+1])
     return f
 
+# Check if value was used previously as a value
 def is_used_backw(f, val, index_op, index_l):
     for j in range(index_op, -1, -1):
         if f.labels[index_l].operations[j].value == val:
@@ -105,6 +116,7 @@ def is_used_backw(f, val, index_op, index_l):
                 return True
     return False
 
+# Check if arg is used previously as a value
 def is_used_args(f, arg, index_op, index_l):
     if '%' not in arg: return True
     for j in range(index_op, len(f.labels[index_l].operations)):
@@ -116,6 +128,7 @@ def is_used_args(f, arg, index_op, index_l):
                 return True
     return False
 
+# Check if value if overwritten
 def is_overwritten(f, val, index_op, index_l):
     for j in range(index_op, len(f.labels[index_l].operations)):
         if f.labels[index_l].operations[j].value == val:
@@ -124,6 +137,7 @@ def is_overwritten(f, val, index_op, index_l):
             return False
     return False
 
+# Check if value is used previously as an argument
 def is_used_front(f, val, index_op, index_l):
     for j in range(index_op, len(f.labels[index_l].operations)):
         if f.labels[index_l].operations[j].args is not None and val in f.labels[index_l].operations[j].args:
@@ -134,6 +148,7 @@ def is_used_front(f, val, index_op, index_l):
                 return True
     return False
 
+# Check if value is from array
 def is_arr(f, val, index_op, index_l):
     for j in range(index_op, -1, -1):
         if val == f.labels[index_l].operations[j].value and f.labels[index_l].operations[j].name == 'getelementptr':
@@ -144,6 +159,7 @@ def is_arr(f, val, index_op, index_l):
                 return f.labels[i].operations[j].args[0]
     return False
 
+# Rename: if argument is equal to previous value, set new value
 def rename_backw_val(f, val, arg, index_op, index_l):
     for j in range(index_op, -1, -1):
         if arg == f.labels[index_l].operations[j].value:
@@ -153,6 +169,7 @@ def rename_backw_val(f, val, arg, index_op, index_l):
             if arg == f.labels[i].operations[j].value:
                 f.labels[i].operations[j].value = val
 
+# Rename: if argument is equal to next argument, set new argument
 def rename_front_arg(f, val, arg, index_op, index_l):
     for j in range(index_op, len(f.labels[index_l].operations)):
         if f.labels[index_l].operations[j].args is not None and val in f.labels[index_l].operations[j].args:
@@ -162,6 +179,7 @@ def rename_front_arg(f, val, arg, index_op, index_l):
             if f.labels[i].operations[j].args is not None and val in f.labels[i].operations[j].args:
                 f.labels[i].operations[j].args[f.labels[i].operations[j].args.index(val)] = arg
 
+# Rename: if value is equal to next value, set new value
 def rename_front_val(f, val, arg, index_op, index_l):
     for j in range(index_op, len(f.labels[index_l].operations)):
         if arg == f.labels[index_l].operations[j].value:
