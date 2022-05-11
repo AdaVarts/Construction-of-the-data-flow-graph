@@ -2,6 +2,8 @@
 
 The tool is the result of bachelor project. It is designed to simplify the process of inspection the symmetric block cipers implementation written in C within security analysis against DFA (Differential Fault Analysis). 
 
+We implemented three main functionalities. With our tool we convert symmetric cipher algorithm written in C into LLVM code. Then we construct a data flow graph from customized data of an LLVM intermediate representation. The tool has a graphical user interface, using which we provide additional information about the constructed graph. We implemented the method of finding and displaying a path in the graph.
+
 ## How to start
 ### Setup
 In order to use the first functionality of converting C into LLVM code, the GCC should be installed. We used gcc 10.3.0. Official installation instructions are written on the developers website
