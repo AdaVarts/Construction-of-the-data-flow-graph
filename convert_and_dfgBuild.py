@@ -1,4 +1,5 @@
 import time
+import traceback
 from addit_methods import is_constant
 from library.pycparser import parse_file
 import llvm_gen 
@@ -147,8 +148,9 @@ def convert_C_into_llvm(filename, printW):
         module = translate_to_c(filename, printW)
         m = module.__str__()
         return m
-    except:
+    except Exception as e:
         printW.emit("Error: converting was not successful")
+        traceback.print_tb(e)
         return None
 
 if __name__ == "__main__":

@@ -87,6 +87,7 @@ class Ui_ConstructorWindow(object):
         font = QtGui.QFont()
         font.setPointSize(10)
         self.textPrint.setFont(font)
+        self.textPrint.setReadOnly(True)
         self.textPrint.setObjectName("textPrint")
         self.gridLayout.addWidget(self.textPrint, 1, 4, 1, 1)
 
@@ -412,9 +413,9 @@ class Ui_ConstructorWindow(object):
     # Set returning values of final function
     def set_return_val(self, ret_values):
         self.listReturnValues.addItems(ret_values)
+        self.btnGenerate.setEnabled(True)
         self.btnDisplayDFG.setEnabled(True)
         self.btnFindNodes.setEnabled(True)
-        self.btnGenerate.setEnabled(True)
 
     # Search for nodes at entered distance, if dfg is not created yet -> construct a dfg
     def find_nodes(self):
@@ -436,6 +437,11 @@ class Ui_ConstructorWindow(object):
         self.lineNodes.setText(str(len(dfg.nodes)))
         self.lineEdges.setText(str(len(dfg.edges)))
         distance = self.lineDistance.text()
+        if self.listReturnValues.count() == 0:
+            self.btnDisplayDFG.setEnabled(True)
+            self.btnFindNodes.setEnabled(True)
+            self.btnGenerate.setEnabled(True)
+            return
         ret_val = self.listReturnValues.selectedItems()[0].text() if len(self.listReturnValues.selectedItems()) == 1 \
             else self.listReturnValues.item(0).text()
         worker = Worker(start_DFG, self.dfg, self.function, distance, ret_val)
